@@ -4,9 +4,11 @@ title U-Claw 虾盘 - OpenClaw 一键启动
 
 echo.
 echo   ╔══════════════════════════════════════╗
-echo   ║     U-Claw 虾盘 v1.0                ║
+echo   ║     U-Claw 虾盘 v1.1                ║
 echo   ║     OpenClaw 一键启动 (Windows)      ║
 echo   ╚══════════════════════════════════════╝
+echo.
+echo   推荐场景：老电脑 / 临时电脑 / 不想改本机环境
 echo.
 
 set "UCLAW_DIR=%~dp0"
@@ -14,22 +16,15 @@ set "OPENCLAW_DIR=%UCLAW_DIR%openclaw"
 set "NODE_DIR=%UCLAW_DIR%runtime\node-win-x64"
 set "NODE_BIN=%NODE_DIR%\node.exe"
 set "NPM_BIN=%NODE_DIR%\npm.cmd"
-set "PNPM_BIN=%NODE_DIR%\pnpm.cmd"
+set "PORTABLE_HOME=%UCLAW_DIR%portable-home"
+set "PORTABLE_STATE_DIR=%PORTABLE_HOME%\.openclaw"
+set "PORTABLE_CONFIG_PATH=%PORTABLE_STATE_DIR%\openclaw.json"
 
-goto MAIN
+set "OPENCLAW_HOME=%PORTABLE_HOME%"
+set "OPENCLAW_STATE_DIR=%PORTABLE_STATE_DIR%"
+set "OPENCLAW_CONFIG_PATH=%PORTABLE_CONFIG_PATH%"
 
-:ENSURE_PNPM
-if exist "%PNPM_BIN%" goto :eof
-echo   缺少 pnpm，正在补充安装...
-call "%NPM_BIN%" install -g pnpm --registry=https://registry.npmmirror.com
-if not exist "%PNPM_BIN%" (
-    echo   [错误] pnpm 安装失败，无法继续构建
-    pause
-    exit /b 1
-)
-goto :eof
-
-:MAIN
+if not exist "%PORTABLE_STATE_DIR%" mkdir "%PORTABLE_STATE_DIR%"
 
 if not exist "%NODE_BIN%" (
     echo   [错误] 找不到 Node.js 运行环境
@@ -59,29 +54,31 @@ if not exist "%OPENCLAW_DIR%\node_modules" (
 if not exist "%OPENCLAW_DIR%\dist" (
     echo   首次运行，正在构建...
     cd /d "%OPENCLAW_DIR%"
-    call :ENSURE_PNPM
-    call "%PNPM_BIN%" run build
-    if not exist "%OPENCLAW_DIR%\dist" (
-        echo   [错误] 构建失败，请检查上方错误信息
-        pause
-        exit /b 1
-    )
+    call "%NODE_BIN%" "%NPM_BIN%" run build
     echo.
 )
 
 echo   正在启动 OpenClaw...
 echo.
 cd /d "%OPENCLAW_DIR%"
-REM 首次运行走 onboard，之后直接启动
-if not exist "%USERPROFILE%\.openclaw\openclaw.json" (
-    echo   首次配置...
-    "%NODE_BIN%" openclaw.mjs onboard --install-daemon
-    if errorlevel 1 exit /b 1
+
+if not exist "%PORTABLE_CONFIG_PATH%" (
+    echo   检测到你还没有完成首次配置。
+    echo   首次配置会直接保存到 U 盘里，换电脑插上后还能继续用。
+    echo.
+    set /p DO_ONBOARD="  现在开始首次配置? (y/n) "
+    if /i "%DO_ONBOARD%"=="y" (
+        "%NODE_BIN%" openclaw.mjs onboard
+        echo.
+        echo   首次配置完成，已保存到 U 盘。
+    )
+) else (
+    echo   正在启动网关服务...
+    echo   此窗口不要关闭，关闭后服务会停止。
+    echo.
+    "%NODE_BIN%" openclaw.mjs gateway run --allow-unconfigured --force
 )
-echo.
-echo   启动 OpenClaw 服务...
-"%NODE_BIN%" openclaw.mjs || call "%NPM_BIN%" start
 
 echo.
-echo   OpenClaw 已退出
+echo   OpenClaw 已退出。拔掉 U 盘后，本次便携运行就会结束。
 pause

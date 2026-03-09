@@ -8,28 +8,25 @@ set "OPENCLAW_DIR=%UCLAW_DIR%openclaw"
 set "NODE_DIR=%UCLAW_DIR%runtime\node-win-x64"
 set "NODE_BIN=%NODE_DIR%\node.exe"
 set "NPM_BIN=%NODE_DIR%\npm.cmd"
-set "PNPM_BIN=%NODE_DIR%\pnpm.cmd"
+set "PORTABLE_HOME=%UCLAW_DIR%portable-home"
+set "PORTABLE_STATE_DIR=%PORTABLE_HOME%\.openclaw"
+set "PORTABLE_CONFIG_PATH=%PORTABLE_STATE_DIR%\openclaw.json"
+
+set "OPENCLAW_HOME=%PORTABLE_HOME%"
+set "OPENCLAW_STATE_DIR=%PORTABLE_STATE_DIR%"
+set "OPENCLAW_CONFIG_PATH=%PORTABLE_CONFIG_PATH%"
 set "PATH=%NODE_DIR%;%PATH%"
 
-goto MENU
+if not exist "%PORTABLE_STATE_DIR%" mkdir "%PORTABLE_STATE_DIR%"
 
-:ENSURE_PNPM
-if exist "%PNPM_BIN%" goto :eof
-echo   缺少 pnpm，正在补充安装...
-call "%NPM_BIN%" install -g pnpm --registry=https://registry.npmmirror.com
-if not exist "%PNPM_BIN%" (
-    echo   [错误] pnpm 安装失败，无法继续构建
-    pause
-    goto MENU
-)
-goto :eof
+goto MENU
 
 :MENU
 cls
 echo.
 echo   ╔════════════════════════════════════════════════════════╗
 echo   ║                                                        ║
-echo   ║          U-Claw 虾盘 v1.0                              ║
+echo   ║          U-Claw 虾盘 v1.1                              ║
 echo   ║          OpenClaw AI 助手 一键安装盘                     ║
 echo   ║                                                        ║
 echo   ║          专为中国用户优化 · 免翻墙 · 离线安装            ║
@@ -42,26 +39,29 @@ for /f "tokens=*" %%v in ('"%NODE_BIN%" --version 2^>nul') do set "NODE_VER=%%v"
 set "ST_MOD=未安装"
 set "ST_BUILD=未构建"
 set "ST_INST=未安装"
+set "ST_PORT=未配置"
 if exist "%OPENCLAW_DIR%\node_modules" set "ST_MOD=已安装"
 if exist "%OPENCLAW_DIR%\dist" set "ST_BUILD=已构建"
 if exist "%USERPROFILE%\.uclaw\openclaw" set "ST_INST=已安装"
+if exist "%PORTABLE_CONFIG_PATH%" set "ST_PORT=已配置"
 
 echo   ║  系统: x64 ^| Node: %NODE_VER%                          ║
-echo   ║  依赖: %ST_MOD% ^| 构建: %ST_BUILD% ^| 安装: %ST_INST%          ║
+echo   ║  依赖: %ST_MOD% ^| 构建: %ST_BUILD%                           ║
+echo   ║  便携配置: %ST_PORT% ^| 电脑安装: %ST_INST%                    ║
 echo   ║                                                        ║
 echo   ╠════════════════════════════════════════════════════════╣
 echo.
 echo     ---- 安装 -----------------------------------------
 echo.
-echo     [1]  一键安装 OpenClaw 到电脑（推荐）
+echo     [1]  安装 OpenClaw 到本机（仅限自己的电脑）
 echo     [2]  仅安装依赖（npm install）
 echo     [3]  仅构建项目（npm build）
-echo     [4]  直接从 U 盘运行（免安装）
+echo     [4]  直接从 U 盘运行（配置也保存在 U 盘里）
 echo.
 echo     ---- 中国优化 -------------------------------------
 echo.
-echo     [5]  配置国产 AI 模型（DeepSeek/Kimi/通义千问）
-echo     [6]  配置中国聊天平台（飞书/钉钉）
+echo     [5]  首次配置向导（选模型、选平台、填 API Key）
+echo     [6]  配置中国聊天平台（QQ Bot/飞书/微信）
 echo     [7]  设置国内镜像源
 echo.
 echo     ---- 维护工具 -------------------------------------
@@ -74,14 +74,17 @@ echo     [12] 清理缓存和临时文件
 echo.
 echo     ---- 其他 -----------------------------------------
 echo.
-echo     [13] 查看使用说明
-echo     [14] 系统信息
+echo     [13] 浏览预装技能（58个，已离线可用）
+echo     [14] 中国用户快速上手指南
+echo     [15] 查看使用说明
+echo     [16] 系统信息
+echo     [17] 打开本地网页控制台
 echo     [0]  退出
 echo.
 echo   ╚════════════════════════════════════════════════════════╝
 echo.
 
-set /p CHOICE="  请选择 [0-14]: "
+set /p CHOICE="  请选择 [0-17]: "
 
 if "%CHOICE%"=="1" goto INSTALL
 if "%CHOICE%"=="2" goto NPM_INSTALL
@@ -95,8 +98,11 @@ if "%CHOICE%"=="9" goto BACKUP
 if "%CHOICE%"=="10" goto RESTORE
 if "%CHOICE%"=="11" goto RESET
 if "%CHOICE%"=="12" goto CLEANUP
-if "%CHOICE%"=="13" goto README
-if "%CHOICE%"=="14" goto SYSINFO
+if "%CHOICE%"=="13" goto SKILLS
+if "%CHOICE%"=="14" goto CHINA_GUIDE
+if "%CHOICE%"=="15" goto README
+if "%CHOICE%"=="16" goto SYSINFO
+if "%CHOICE%"=="17" goto DASHBOARD
 if "%CHOICE%"=="0" goto EXIT
 
 echo   无效选择
@@ -105,7 +111,10 @@ goto MENU
 
 :INSTALL
 echo.
-echo   === 一键安装 OpenClaw 到电脑 ===
+echo   === 安装 OpenClaw 到电脑 ===
+echo.
+echo   提醒：如果这是临时电脑、公司电脑或别人的电脑，
+echo   更推荐返回主菜单选择 [4] 从 U 盘运行。
 echo.
 call "%UCLAW_DIR%安装到电脑.bat"
 pause
@@ -132,13 +141,7 @@ if not exist "%OPENCLAW_DIR%\node_modules" (
     call "%NPM_BIN%" install --registry=https://registry.npmmirror.com
 )
 cd /d "%OPENCLAW_DIR%"
-call :ENSURE_PNPM
-call "%PNPM_BIN%" run build
-if not exist "%OPENCLAW_DIR%\dist" (
-    echo   [错误] 构建失败，请检查上方错误信息
-    pause
-    goto MENU
-)
+call "%NODE_BIN%" "%NPM_BIN%" run build
 echo.
 echo   构建完成!
 pause
@@ -148,6 +151,9 @@ goto MENU
 echo.
 echo   === 从 U 盘启动 OpenClaw ===
 echo.
+echo   便携模式：配置、状态、记忆都会写在这只 U 盘里。
+echo   拔掉 U 盘后当前会话会结束，但换一台电脑再插上还能继续用。
+echo.
 if not exist "%OPENCLAW_DIR%\node_modules" (
     echo   先安装依赖...
     cd /d "%OPENCLAW_DIR%"
@@ -156,82 +162,50 @@ if not exist "%OPENCLAW_DIR%\node_modules" (
 if not exist "%OPENCLAW_DIR%\dist" (
     echo   先构建...
     cd /d "%OPENCLAW_DIR%"
-    call :ENSURE_PNPM
-    call "%PNPM_BIN%" run build
-    if not exist "%OPENCLAW_DIR%\dist" (
-        echo   [错误] 构建失败，请检查上方错误信息
-        pause
-        goto MENU
-    )
+    call "%NODE_BIN%" "%NPM_BIN%" run build
 )
 cd /d "%OPENCLAW_DIR%"
-REM 首次运行走 onboard，之后直接启动
-if not exist "%USERPROFILE%\.openclaw\openclaw.json" (
-    echo   首次配置...
-    "%NODE_BIN%" openclaw.mjs onboard --install-daemon
-    if errorlevel 1 goto MENU
+if not exist "%PORTABLE_CONFIG_PATH%" (
+    echo   检测到你还没有完成首次配置。
+    echo   首次配置会保存在 U 盘中，不会写进这台电脑。
+    echo.
+    set /p DO_ONBOARD="  现在开始首次配置? (y/n) "
+    if /i "!DO_ONBOARD!"=="y" (
+        "%NODE_BIN%" openclaw.mjs onboard
+        echo.
+        echo   首次配置完成，已保存到 U 盘。
+    )
+) else (
+    echo   正在启动网关服务...
+    echo   此窗口不要关闭，关闭后服务会停止。
+    echo.
+    "%NODE_BIN%" openclaw.mjs gateway run --allow-unconfigured --force
 )
-echo.
-echo   启动 OpenClaw 服务...
-"%NODE_BIN%" openclaw.mjs || call "%NPM_BIN%" start
 pause
 goto MENU
 
 :CHINA_MODELS
 echo.
-echo   === 配置国产 AI 模型 ===
+echo   === 首次配置向导 ===
 echo.
-echo   [a] DeepSeek（深度求索）    - 性价比最高，推荐首选
-echo   [b] Kimi / 月之暗面         - 256K 超长上下文
-echo   [c] 通义千问 Qwen           - 阿里云，免费额度大
-echo   [d] 智谱 GLM                - 清华系
-echo   [e] MiniMax                  - 语音和多模态
-echo   [f] 豆包 Doubao（字节跳动）  - 火山引擎平台
+echo   国产模型选择提示:
 echo.
-set /p MODEL="  请选择 (a-f): "
-
-set "ENV_FILE=%OPENCLAW_DIR%\.env"
-if not exist "%ENV_FILE%" type nul > "%ENV_FILE%"
-
-if /i "%MODEL%"=="a" (
-    echo.
-    echo   配置 DeepSeek
-    echo   获取 API Key: https://platform.deepseek.com/
-    set /p APIKEY="  请输入 DeepSeek API Key: "
-    REM 移除旧配置再写入，避免重复
-    if exist "%ENV_FILE%" (
-        findstr /v /r "^OPENAI_API_KEY= ^OPENAI_BASE_URL=" "%ENV_FILE%" > "%ENV_FILE%.tmp" 2>nul
-        move /y "%ENV_FILE%.tmp" "%ENV_FILE%" >nul 2>nul
-    )
-    echo OPENAI_API_KEY=!APIKEY!>> "%ENV_FILE%"
-    echo OPENAI_BASE_URL=https://api.deepseek.com/v1>> "%ENV_FILE%"
-    echo   DeepSeek 已配置!
+echo   DeepSeek    → 选 Custom Provider
+echo                  Base URL: https://api.deepseek.com/v1
+echo                  模型名: deepseek-chat
+echo   Kimi        → 选 Moonshot AI
+echo   通义千问    → 选 Qwen
+echo   MiniMax     → 选 MiniMax
+echo   豆包        → 选 Volcano Engine
+echo.
+echo   按方向键上下滚动列表，回车确认
+echo.
+if not exist "%OPENCLAW_DIR%\node_modules" (
+    cd /d "%OPENCLAW_DIR%"
+    call "%NPM_BIN%" install --registry=https://registry.npmmirror.com
 )
-if /i "%MODEL%"=="b" (
-    echo.
-    echo   配置 Kimi
-    echo   获取 API Key: https://platform.moonshot.cn/
-    set /p APIKEY="  请输入 Moonshot API Key: "
-    if exist "%ENV_FILE%" (
-        findstr /v /r "^OPENAI_API_KEY= ^OPENAI_BASE_URL=" "%ENV_FILE%" > "%ENV_FILE%.tmp" 2>nul
-        move /y "%ENV_FILE%.tmp" "%ENV_FILE%" >nul 2>nul
-    )
-    echo OPENAI_API_KEY=!APIKEY!>> "%ENV_FILE%"
-    echo OPENAI_BASE_URL=https://api.moonshot.cn/v1>> "%ENV_FILE%"
-    echo   Kimi 已配置!
-)
-if /i "%MODEL%"=="c" (
-    echo.
-    echo   配置通义千问
-    echo   获取 API Key: https://dashscope.console.aliyun.com/
-    set /p APIKEY="  请输入 Qwen API Key: "
-    if exist "%ENV_FILE%" (
-        findstr /v "^ZAI_API_KEY=" "%ENV_FILE%" > "%ENV_FILE%.tmp" 2>nul
-        move /y "%ENV_FILE%.tmp" "%ENV_FILE%" >nul 2>nul
-    )
-    echo ZAI_API_KEY=!APIKEY!>> "%ENV_FILE%"
-    echo   通义千问已配置!
-)
+cd /d "%OPENCLAW_DIR%"
+"%NODE_BIN%" openclaw.mjs onboard
 pause
 goto MENU
 
@@ -239,19 +213,80 @@ goto MENU
 echo.
 echo   === 配置中国聊天平台 ===
 echo.
-echo   [a] 飞书 Feishu/Lark  - 已内置，功能最全
-echo   [b] Telegram           - 国内可用
+echo   [a] 飞书 Feishu/Lark       — 已内置，企业首选
+echo   [b] QQ（腾讯官方）★推荐    — 3条命令，1分钟，免费免翻墙
+echo   [c] 微信（社区插件）         — iPad协议
+echo   [d] Telegram                 — 推荐，简单好用
 echo.
-echo   企业微信/钉钉/QQ 需要桥接服务，后续版本集成
-echo.
-set /p CH="  请选择 (a-b): "
+set /p CH="  请选择 (a-d): "
 
 if not exist "%OPENCLAW_DIR%\node_modules" (
     cd /d "%OPENCLAW_DIR%"
     call "%NPM_BIN%" install --registry=https://registry.npmmirror.com
 )
 cd /d "%OPENCLAW_DIR%"
-"%NODE_BIN%" openclaw.mjs onboard
+
+if /i "%CH%"=="a" (
+    echo.
+    echo   配置飞书 Feishu
+    echo   1. 访问 https://open.feishu.cn/app 创建应用
+    echo   2. 获取 App ID 和 App Secret
+    echo   3. 配置事件订阅和权限
+    echo.
+    "%NODE_BIN%" openclaw.mjs onboard
+)
+if /i "%CH%"=="b" (
+    echo.
+    echo   配置 QQ（腾讯官方接入）
+    echo.
+    echo   这是国内最简单的 AI 助手接入方式！
+    echo   全程 1 分钟，完全免费，无需翻墙。
+    echo.
+    echo   1. 扫码注册: http://q.qq.com/qqbot/openclaw/login.html
+    echo   2. 点击「创建机器人」，获取 AppID 和 AppSecret
+    echo.
+    if exist "%OPENCLAW_DIR%\dist" (
+        set /p DO_QQ="  是否现在安装 QQ 插件? (y/n) "
+        if /i "!DO_QQ!"=="y" (
+            echo.
+            echo   正在安装 QQ 插件...
+            "%NODE_BIN%" openclaw.mjs plugins install @sliverp/qqbot@latest
+            echo.
+            set /p QQ_APP_ID="  AppID:  "
+            echo.
+            set /p QQ_APP_SECRET="  AppSecret:  "
+            echo.
+            if not "!QQ_APP_ID!"=="" if not "!QQ_APP_SECRET!"=="" (
+                echo   正在绑定 QQ 机器人...
+                "%NODE_BIN%" openclaw.mjs channels add --channel qqbot --token "!QQ_APP_ID!:!QQ_APP_SECRET!"
+                echo.
+                set /p QQ_ALLOW="  请输入你自己的 QQ 号（设置白名单，留空跳过）: "
+                if not "!QQ_ALLOW!"=="" (
+                    "%NODE_BIN%" openclaw.mjs config set channels.qqbot.allowFrom "\"!QQ_ALLOW!\""
+                    echo   白名单已设置
+                )
+                echo.
+                echo   QQ 机器人配置完成！
+                echo   请重启网关后生效（主菜单选 [4] 或 [17]）
+            )
+        )
+    )
+)
+if /i "%CH%"=="c" (
+    echo.
+    echo   配置微信（社区插件）
+    echo   安装微信插件:
+    "%NODE_BIN%" openclaw.mjs plugins install @icesword760/openclaw-wechat
+)
+if /i "%CH%"=="d" (
+    echo.
+    echo   配置 Telegram
+    echo   1. 在 Telegram 中找 @BotFather
+    echo   2. 发送 /newbot 创建机器人
+    echo   3. 获取 Bot Token
+    echo.
+    "%NODE_BIN%" openclaw.mjs onboard
+)
 pause
 goto MENU
 
@@ -262,13 +297,14 @@ echo.
 cd /d "%OPENCLAW_DIR%"
 call "%NPM_BIN%" config set registry https://registry.npmmirror.com --location=project
 echo   npm 镜像已设置: registry.npmmirror.com
-echo   后续 npm install 将自动使用淘宝镜像
 pause
 goto MENU
 
 :DOCTOR
 echo.
 echo   === 诊断修复 ===
+echo.
+echo   提示: 选 [17] 可打开网页控制台，在浏览器中查看完整状态
 echo.
 if not exist "%OPENCLAW_DIR%\node_modules" (
     cd /d "%OPENCLAW_DIR%"
@@ -288,18 +324,13 @@ set "TIMESTAMP=%TIMESTAMP: =0%"
 set "BACKUP_DIR=%UCLAW_DIR%backups\backup_%TIMESTAMP%"
 mkdir "%BACKUP_DIR%" 2>nul
 
+if exist "%PORTABLE_STATE_DIR%" (
+    xcopy "%PORTABLE_STATE_DIR%" "%BACKUP_DIR%\portable-state\" /e /i /q >nul 2>&1
+    echo   [OK] 便携模式状态已备份
+)
 if exist "%OPENCLAW_DIR%\.env" (
     copy "%OPENCLAW_DIR%\.env" "%BACKUP_DIR%\.env" >nul
     echo   [OK] .env 配置已备份
-)
-if exist "%USERPROFILE%\.openclaw\openclaw.json" (
-    mkdir "%BACKUP_DIR%\openclaw-state" 2>nul
-    copy "%USERPROFILE%\.openclaw\openclaw.json" "%BACKUP_DIR%\openclaw-state\" >nul
-    echo   [OK] OpenClaw 状态已备份
-)
-if exist "%USERPROFILE%\.openclaw\credentials" (
-    xcopy "%USERPROFILE%\.openclaw\credentials" "%BACKUP_DIR%\openclaw-state\credentials\" /e /i /q >nul 2>&1
-    echo   [OK] 凭据已备份
 )
 
 echo.
@@ -329,13 +360,13 @@ if not exist "%RESTORE_PATH%" (
     goto MENU
 )
 
+if exist "%RESTORE_PATH%\portable-state" (
+    xcopy "%RESTORE_PATH%\portable-state" "%PORTABLE_STATE_DIR%\" /e /i /q /y >nul 2>&1
+    echo   [OK] 便携模式状态已恢复
+)
 if exist "%RESTORE_PATH%\.env" (
     copy "%RESTORE_PATH%\.env" "%OPENCLAW_DIR%\.env" >nul
     echo   [OK] .env 已恢复
-)
-if exist "%RESTORE_PATH%\openclaw-state" (
-    xcopy "%RESTORE_PATH%\openclaw-state" "%USERPROFILE%\.openclaw\" /e /i /q /y >nul 2>&1
-    echo   [OK] OpenClaw 状态已恢复
 )
 
 echo.
@@ -376,12 +407,35 @@ echo   === 清理缓存 ===
 echo.
 call "%NPM_BIN%" cache clean --force 2>nul
 echo   npm 缓存已清理
-if exist "%USERPROFILE%\.openclaw\logs" (
-    rmdir /s /q "%USERPROFILE%\.openclaw\logs" 2>nul
+if exist "%PORTABLE_STATE_DIR%\logs" (
+    rmdir /s /q "%PORTABLE_STATE_DIR%\logs" 2>nul
     echo   日志已清理
 )
 echo.
 echo   清理完成!
+pause
+goto MENU
+
+:SKILLS
+echo.
+echo   === 预装技能 ===
+echo.
+if not exist "%OPENCLAW_DIR%\node_modules" (
+    cd /d "%OPENCLAW_DIR%"
+    call "%NPM_BIN%" install --registry=https://registry.npmmirror.com
+)
+cd /d "%OPENCLAW_DIR%"
+"%NODE_BIN%" openclaw.mjs plugins list
+pause
+goto MENU
+
+:CHINA_GUIDE
+echo.
+if exist "%UCLAW_DIR%中国用户指南.txt" (
+    type "%UCLAW_DIR%中国用户指南.txt"
+) else (
+    echo   指南文件不存在
+)
 pause
 goto MENU
 
@@ -403,16 +457,34 @@ echo   操作系统:    %OS%
 echo   处理器:      %PROCESSOR_ARCHITECTURE%
 echo   Node.js:     %NODE_VER%
 echo   U-Claw 路径: %UCLAW_DIR%
+echo   便携配置:    %ST_PORT%
 echo.
 if exist "%USERPROFILE%\.uclaw" (
     echo   已安装路径: %USERPROFILE%\.uclaw
 ) else (
     echo   电脑安装:   未安装
 )
-if exist "%USERPROFILE%\.openclaw" (
-    echo   OpenClaw 状态: %USERPROFILE%\.openclaw
-)
 echo.
+pause
+goto MENU
+
+:DASHBOARD
+echo.
+echo   === 启动网关 + 打开网页控制台 ===
+echo.
+if not exist "%PORTABLE_CONFIG_PATH%" (
+    echo   你还没有完成便携配置。请先选 [4] 从 U 盘运行。
+    pause
+    goto MENU
+)
+if not exist "%OPENCLAW_DIR%\node_modules" (
+    cd /d "%OPENCLAW_DIR%"
+    call "%NPM_BIN%" install --registry=https://registry.npmmirror.com
+)
+cd /d "%OPENCLAW_DIR%"
+echo   此窗口不要关闭，关闭后服务会停止。
+echo.
+"%NODE_BIN%" openclaw.mjs gateway run --allow-unconfigured --force
 pause
 goto MENU
 
