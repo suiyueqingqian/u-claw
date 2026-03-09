@@ -92,9 +92,11 @@ info "安装 npm 依赖（使用淘宝镜像）..."
 
 # 使用 U-Claw 自带的 Node.js 来安装
 if [ "$(uname -m)" = "arm64" ]; then
+    NODE_DIR="$UCLAW_DIR/runtime/node-mac-arm64"
     NODE_BIN="$UCLAW_DIR/runtime/node-mac-arm64/bin/node"
     NPM_BIN="$UCLAW_DIR/runtime/node-mac-arm64/bin/npm"
 else
+    NODE_DIR="$UCLAW_DIR/runtime/node-mac-x64"
     NODE_BIN="$UCLAW_DIR/runtime/node-mac-x64/bin/node"
     NPM_BIN="$UCLAW_DIR/runtime/node-mac-x64/bin/npm"
 fi
@@ -108,17 +110,18 @@ cd "$UCLAW_DIR/openclaw"
 info "安装 pnpm..."
 "$NODE_BIN" "$NPM_BIN" install -g pnpm --registry=https://registry.npmmirror.com 2>&1 | tail -3
 PNPM_BIN="$NODE_DIR/bin/pnpm"
+[ -x "$PNPM_BIN" ] || error "pnpm 安装失败: $PNPM_BIN 不存在"
 
 # 安装依赖（使用 pnpm，与上游一致）
 info "pnpm install 中...（可能需要几分钟）"
 cd "$UCLAW_DIR/openclaw"
-"$NODE_BIN" "$PNPM_BIN" install --registry=https://registry.npmmirror.com 2>&1 | tail -5
+"$PNPM_BIN" install --registry=https://registry.npmmirror.com 2>&1 | tail -5
 ok "依赖安装完成"
 
 # ---- 5. 构建 OpenClaw ----
 info "构建 OpenClaw..."
 cd "$UCLAW_DIR/openclaw"
-"$NODE_BIN" "$PNPM_BIN" run build 2>&1 | tail -10
+"$PNPM_BIN" run build 2>&1 | tail -10
 if [ -d "$UCLAW_DIR/openclaw/dist" ]; then
     ok "构建成功，dist/ 已生成"
 else
@@ -144,8 +147,10 @@ if [ -d "$SCRIPTS_SRC" ]; then
     # 复制教程文档
     mkdir -p "$UCLAW_DIR/docs"
     cp "$SCRIPT_DIR/docs/教程-OpenClaw中国区完全指南.md" "$UCLAW_DIR/docs/" 2>/dev/null || true
+    # 复制微信二维码
+    cp "$SCRIPT_DIR/微信二维码.jpg" "$UCLAW_DIR/" 2>/dev/null || true
     chmod +x "$UCLAW_DIR/启动菜单.command" "$UCLAW_DIR/运行.command" "$UCLAW_DIR/安装到电脑.command" 2>/dev/null || true
-    ok "用户脚本已复制（含启动菜单、中国用户指南）"
+    ok "用户脚本已复制（含启动菜单、中国用户指南、微信二维码）"
 else
     warn "找不到 uclaw-scripts/ 目录，请手动复制脚本到 U-Claw/"
 fi

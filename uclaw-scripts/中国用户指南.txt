@@ -156,5 +156,8 @@ U-Claw 已预装 52 个技能，以下是最实用的:
 4. 重置前会自动提醒你备份
 
 加入社区:
-  - u-claw.org
+  - 官网: u-claw.org
   - GitHub: github.com/dongsheng123132/u-claw
+  - 邮箱: hefangsheng@gmail.com
+  - 微信: 扫描 U 盘内「微信二维码.jpg」添加作者
+    （技术咨询、合作交流、问题反馈）
