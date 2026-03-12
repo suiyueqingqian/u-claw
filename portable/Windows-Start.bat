@@ -79,17 +79,31 @@ if %errorlevel%==0 (
 )
 
 echo   Starting OpenClaw on port %PORT%...
-echo   DO NOT close this window!
+echo.
+
+REM Start Config Server in background
+echo   Starting Config Center on port 18788...
+set "CONFIG_SERVER=%UCLAW_DIR%config-server"
+start /B "" "%NODE_BIN%" "%CONFIG_SERVER%\server.js" >nul 2>&1
+
+REM Wait for config server to start
+timeout /t 2 /nobreak >nul
+
+REM Open both Config Center and Dashboard
+echo   Opening Config Center and Dashboard...
+timeout /t 1 /nobreak >nul
+
+REM Open Config Center (Node.js web UI)
+start "" http://127.0.0.1:18788/
+
+REM Open OpenClaw Dashboard
+start "" http://127.0.0.1:%PORT%/#token=uclaw
+
+echo   Browsers opened. Starting OpenClaw Gateway on port %PORT%...
+echo   DO NOT close this window while using U-Claw!
 echo.
 
 cd /d "%CORE_DIR%"
-
-REM Always open dashboard - it will guide first-time setup
-echo   正在打开控制台...
-echo   Opening dashboard at http://127.0.0.1:%PORT%
-timeout /t 2 /nobreak >nul
-start "" http://127.0.0.1:%PORT%/#token=uclaw
-
 set "OPENCLAW_MJS=%CORE_DIR%\node_modules\openclaw\openclaw.mjs"
 "%NODE_BIN%" "%OPENCLAW_MJS%" gateway run --allow-unconfigured --force --port %PORT%
 

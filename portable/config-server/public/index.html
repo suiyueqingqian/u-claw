@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U-Claw 配置中心</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #0a0a0a; color: #e0e0e0; padding: 20px; }
+.container { max-width: 600px; margin: 0 auto; }
+h1 { text-align: center; margin-bottom: 10px; }
+h1 span { color: #ff6b35; }
+.subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 0.9em; }
+
+.section { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.section h2 { color: #ff6b35; font-size: 1.1em; margin-bottom: 10px; }
+
+.form-group { margin-bottom: 15px; }
+label { display: block; color: #ccc; margin-bottom: 5px; font-size: 0.9em; }
+input, select { width: 100%; padding: 10px; background: #222; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 0.95em; }
+input:focus, select:focus { outline: none; border-color: #ff6b35; }
+
+.btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 0.95em; cursor: pointer; }
+.btn-primary { background: #ff6b35; color: #fff; }
+.btn-primary:hover { background: #e55a25; }
+
+.status { padding: 10px; border-radius: 6px; margin-top: 10px; display: none; }
+.status.success { display: block; background: rgba(76,175,80,0.12); color: #4caf50; border: 1px solid rgba(76,175,80,0.3); }
+.status.error { display: block; background: rgba(244,67,54,0.12); color: #f44336; border: 1px solid rgba(244,67,54,0.3); }
+
+.links { text-align: center; margin-top: 20px; }
+.links a { color: #ff6b35; text-decoration: none; margin: 0 10px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🦞 <span>U-Claw</span> 配置中心</h1>
+  <p class="subtitle">简单配置，快速启动</p>
+
+  <!-- AI 模型配置 -->
+  <div class="section">
+    <h2>AI 模型配置</h2>
+    <div class="form-group">
+      <label>Provider</label>
+      <select id="provider">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="openai">OpenAI (GPT)</option>
+        <option value="custom">自定义 (DeepSeek/Kimi/Qwen)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="password" id="apiKey" placeholder="输入您的 API Key">
+    </div>
+    <div class="form-group" id="baseUrlGroup" style="display:none">
+      <label>Base URL</label>
+      <input type="text" id="baseUrl" placeholder="https://api.deepseek.com/v1">
+    </div>
+    <div class="form-group" id="modelGroup" style="display:none">
+      <label>Model Name</label>
+      <input type="text" id="modelName" placeholder="deepseek-chat">
+    </div>
+    <button class="btn btn-primary" onclick="saveAI()">保存 AI 配置</button>
+    <div class="status" id="aiStatus"></div>
+  </div>
+
+  <!-- QQ Bot 配置 -->
+  <div class="section">
+    <h2>QQ 机器人（可选）</h2>
+    <div class="form-group">
+      <label>AppID</label>
+      <input type="text" id="qqAppId" placeholder="从 q.qq.com 获取">
+    </div>
+    <div class="form-group">
+      <label>AppSecret</label>
+      <input type="password" id="qqSecret" placeholder="从 q.qq.com 获取">
+    </div>
+    <button class="btn btn-primary" onclick="saveQQ()">保存 QQ 配置</button>
+    <div class="status" id="qqStatus"></div>
+  </div>
+
+  <div class="links">
+    <a href="http://127.0.0.1:18789/#token=uclaw" target="_blank">打开 OpenClaw 控制台 →</a>
+  </div>
+</div>
+
+<script>
+let config = {};
+
+// 加载配置
+async function loadConfig() {
+  try {
+    const res = await fetch('/api/config');
+    config = await res.json();
+
+    // 填充表单
+    if (config.agent) {
+      document.getElementById('provider').value = config.agent.provider || 'anthropic';
+      document.getElementById('apiKey').value = config.agent.apiKey || '';
+      if (config.agent.baseUrl) {
+        document.getElementById('baseUrl').value = config.agent.baseUrl;
+        document.getElementById('baseUrlGroup').style.display = 'block';
+      }
+      if (config.agent.model) {
+        document.getElementById('modelName').value = config.agent.model;
+        document.getElementById('modelGroup').style.display = 'block';
+      }
+    }
+
+    if (config.channels && config.channels.qqbot) {
+      const token = config.channels.qqbot.token || '';
+      const [appId, secret] = token.split(':');
+      document.getElementById('qqAppId').value = appId || '';
+      document.getElementById('qqSecret').value = secret || '';
+    }
+  } catch (err) {
+    console.error('Failed to load config:', err);
+  }
+}
+
+// Provider 切换
+document.getElementById('provider').addEventListener('change', (e) => {
+  const custom = e.target.value === 'custom';
+  document.getElementById('baseUrlGroup').style.display = custom ? 'block' : 'none';
+  document.getElementById('modelGroup').style.display = custom ? 'block' : 'none';
+});
+
+// 保存 AI 配置
+async function saveAI() {
+  const provider = document.getElementById('provider').value;
+  const apiKey = document.getElementById('apiKey').value;
+  const baseUrl = document.getElementById('baseUrl').value;
+  const modelName = document.getElementById('modelName').value;
+
+  if (!apiKey) {
+    showStatus('aiStatus', 'error', '请输入 API Key');
+    return;
+  }
+
+  config.agent = { provider, apiKey };
+  if (provider === 'custom') {
+    config.agent.baseUrl = baseUrl;
+    config.agent.model = modelName;
+  }
+
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+    const result = await res.json();
+    if (result.ok) {
+      showStatus('aiStatus', 'success', '✓ AI 配置已保存');
+    } else {
+      showStatus('aiStatus', 'error', '保存失败: ' + (result.error || 'Unknown error'));
+    }
+  } catch (err) {
+    showStatus('aiStatus', 'error', '保存失败: ' + err.message);
+  }
+}
+
+// 保存 QQ 配置
+async function saveQQ() {
+  const appId = document.getElementById('qqAppId').value;
+  const secret = document.getElementById('qqSecret').value;
+
+  if (!appId || !secret) {
+    showStatus('qqStatus', 'error', '请输入 AppID 和 Secret');
+    return;
+  }
+
+  config.channels = config.channels || {};
+  config.channels.qqbot = {
+    token: `${appId}:${secret}`,
+    enabled: true
+  };
+
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    });
+    const result = await res.json();
+    if (result.ok) {
+      showStatus('qqStatus', 'success', '✓ QQ 配置已保存，请重启 OpenClaw');
+    } else {
+      showStatus('qqStatus', 'error', '保存失败: ' + (result.error || 'Unknown error'));
+    }
+  } catch (err) {
+    showStatus('qqStatus', 'error', '保存失败: ' + err.message);
+  }
+}
+
+function showStatus(id, type, message) {
+  const el = document.getElementById(id);
+  el.className = `status ${type}`;
+  el.textContent = message;
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+// 初始化
+loadConfig();
+</script>
+</body>
+</html>
