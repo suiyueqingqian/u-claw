@@ -14,6 +14,8 @@ set "OPENCLAW_STATE_DIR=%STATE_DIR%"
 set "OPENCLAW_CONFIG_PATH=%STATE_DIR%\openclaw.json"
 set "PATH=%NODE_DIR%;%PATH%"
 
+set "OPENCLAW_MJS=%CORE_DIR%\node_modules\openclaw\openclaw.mjs"
+
 if not exist "%STATE_DIR%" mkdir "%STATE_DIR%"
 if not exist "%DATA_DIR%\memory" mkdir "%DATA_DIR%\memory"
 if not exist "%DATA_DIR%\backups" mkdir "%DATA_DIR%\backups"
@@ -75,7 +77,7 @@ echo   Qwen      - Qwen
 echo   Doubao    - Volcano Engine
 echo.
 cd /d "%CORE_DIR%"
-"%NODE_BIN%" openclaw.mjs onboard
+"%NODE_BIN%" "%OPENCLAW_MJS%" onboard
 pause
 goto :menu
 
@@ -95,7 +97,7 @@ if not exist "%STATE_DIR%\openclaw.json" (
     echo {"gateway":{"mode":"local","auth":{"token":"uclaw"}}} > "%STATE_DIR%\openclaw.json"
 )
 start "" http://127.0.0.1:%PORT%/#token=uclaw
-"%NODE_BIN%" openclaw.mjs gateway run --allow-unconfigured --force --port %PORT%
+"%NODE_BIN%" "%OPENCLAW_MJS%" gateway run --allow-unconfigured --force --port %PORT%
 pause
 goto :menu
 
@@ -113,10 +115,10 @@ set /p qqsecret="  AppSecret: "
 if "%qqid%"=="" goto :qq_cancel
 if "%qqsecret%"=="" goto :qq_cancel
 cd /d "%CORE_DIR%"
-"%NODE_BIN%" openclaw.mjs channels add --channel qqbot --token "%qqid%:%qqsecret%"
+"%NODE_BIN%" "%OPENCLAW_MJS%" channels add --channel qqbot --token "%qqid%:%qqsecret%"
 echo.
 set /p qqallow="  Your QQ number (allowlist, empty to skip): "
-if not "%qqallow%"=="" "%NODE_BIN%" openclaw.mjs config set channels.qqbot.allowFrom "%qqallow%"
+if not "%qqallow%"=="" "%NODE_BIN%" "%OPENCLAW_MJS%" config set channels.qqbot.allowFrom "%qqallow%"
 echo.
 echo   QQ Bot configured! Restart gateway to apply.
 pause
@@ -141,7 +143,7 @@ goto :menu
 
 :doctor
 cd /d "%CORE_DIR%"
-"%NODE_BIN%" openclaw.mjs doctor --repair
+"%NODE_BIN%" "%OPENCLAW_MJS%" doctor --repair
 pause
 goto :menu
 

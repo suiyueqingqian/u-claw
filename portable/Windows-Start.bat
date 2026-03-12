@@ -59,12 +59,7 @@ if not exist "%CORE_DIR%\node_modules" (
     echo.
 )
 
-if not exist "%CORE_DIR%\dist" (
-    echo   First run - building...
-    cd /d "%CORE_DIR%"
-    call "%NPM_BIN%" run build
-    echo.
-)
+REM OpenClaw doesn't need a separate build step when installed via npm
 
 REM Find available port
 set PORT=18789
@@ -101,7 +96,8 @@ if "%HAS_MODEL%"=="yes" (
     start "" "%UCLAW_DIR%Config.html?port=%PORT%"
 )
 
-"%NODE_BIN%" openclaw.mjs gateway run --allow-unconfigured --force --port %PORT%
+set "OPENCLAW_MJS=%CORE_DIR%\node_modules\openclaw\openclaw.mjs"
+"%NODE_BIN%" "%OPENCLAW_MJS%" gateway run --allow-unconfigured --force --port %PORT%
 
 echo.
 echo   OpenClaw stopped.
