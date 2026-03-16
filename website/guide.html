@@ -1145,6 +1145,23 @@ openclaw plugin uninstall &lt;插件名&gt;</code></pre>
 
 <div class="warn"><strong>Secure Boot 问题：</strong>如果无法从 USB 启动，进入 BIOS 设置关闭 Secure Boot。路径通常是 Security → Secure Boot → Disabled。</div>
 
+<div class="card" style="background:#1a1a2e;border:2px solid #0f3460;margin-bottom:2rem;">
+<h3 style="margin-top:0;">快速命令参考（复制粘贴用）</h3>
+<p style="color:var(--dim)">在 Ubuntu 终端中：Ctrl+Shift+V 粘贴</p>
+
+<strong>第一步：格式化持久化（仅首次，格式化后必须重启）</strong>
+<pre><code>sudo bash /media/*/Ventoy/u-claw-linux/format-persistence.sh</code></pre>
+
+<strong>第二步：重启后，安装 OpenClaw</strong>
+<pre><code>sudo bash /media/*/Ventoy/u-claw-linux/setup-openclaw.sh</code></pre>
+
+<strong>第三步：启动 AI 助手</strong>
+<pre><code>bash /opt/u-claw/start-openclaw.sh</code></pre>
+
+<strong>启用 SSH（可选，让其他电脑远程控制）</strong>
+<pre><code>sudo bash /media/*/Ventoy/u-claw-linux/enable-ssh.sh</code></pre>
+</div>
+
 <h2>首次启动 Ubuntu</h2>
 
 <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Ventoy 菜单选择 Ubuntu</strong>

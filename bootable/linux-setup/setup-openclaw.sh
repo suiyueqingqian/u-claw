@@ -185,6 +185,23 @@ if [[ "$AUTOSTART" =~ ^[Yy]$ ]]; then
     echo "      Autostart enabled."
 fi
 
+# ── Optional: Install SSH for remote management ──
+echo ""
+read -rp "Install SSH server for remote access? (y/N): " INSTALL_SSH
+if [[ "$INSTALL_SSH" =~ ^[Yy]$ ]]; then
+    echo "      Installing OpenSSH server..."
+    apt-get install -y -qq openssh-server > /dev/null 2>&1
+    systemctl enable ssh
+    systemctl start ssh
+    echo ""
+    echo "      Set a password for SSH login (user: $REAL_USER):"
+    passwd "$REAL_USER"
+    LOCAL_IP=$(ip -4 addr show | grep -oP '(?<=inet\s)(?!127\.)\d+\.\d+\.\d+\.\d+' | head -1)
+    echo ""
+    echo "      SSH enabled! Connect from another computer:"
+    echo "      ssh ${REAL_USER}@${LOCAL_IP}"
+fi
+
 # ── Set ownership ──
 chown -R "$REAL_USER:$REAL_USER" "$INSTALL_DIR/data"
 
