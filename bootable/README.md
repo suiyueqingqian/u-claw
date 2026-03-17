@@ -226,13 +226,17 @@ bootable/
    - Ventoy 安装会格式化整个 U 盘，**务必提前备份**
    - 脚本会列出所有 USB 设备让你确认，看清楚再操作
 
-3. **Step 3 持久化镜像**
-   - 有 WSL → 自动创建 ext4 镜像（最省事）
-   - 没 WSL → 创建空文件，首次进 Linux 后需手动格式化：
+3. **Step 3 持久化镜像（重要教训）**
+   - 有标准 WSL（Ubuntu 等）→ 自动创建 ext4 镜像（最省事）
+   - 只有 docker-desktop WSL → 脚本会尝试用 `/sbin/mkfs.ext4` 格式化（2026-03-17 修复）
+   - 完全没有 WSL → 创建空文件，**必须**首次进 Linux 后手动格式化：
      ```bash
      sudo mkfs.ext4 -F -L casper-rw /media/*/Ventoy/persistence.dat
      ```
      格式化后**必须重启**才能生效
+   - **踩坑记录**：空的 persistence.dat（无 ext4 文件系统）会导致 Ventoy 挂载失败，
+     Ubuntu 启动直接掉进 initramfs。验证方法：读取文件 offset 1080 处的 2 字节，
+     应为 `0x53 0xEF`（ext4 magic number `0xEF53` 的 little-endian 表示）
    - 大小建议：32GB U 盘选 20GB，64GB U 盘可选 40GB+
 
 4. **ISO 下载失败**
@@ -285,6 +289,7 @@ bootable/
 |------|---------|
 | 无法从 U 盘启动 | BIOS 关闭 Secure Boot，开启 USB Boot |
 | Ventoy 菜单无 Ubuntu | ISO 文件是否在 Ventoy 数据分区根目录 |
+| 启动卡在 initramfs | persistence.dat 未格式化为 ext4，用 `mkfs.ext4 -F -L casper-rw` 格式化后重启 |
 | 持久化不生效（重启丢数据） | persistence.dat 是否已格式化为 ext4，卷标是否为 `casper-rw` |
 | OpenClaw 安装失败 | 检查网络，确认能访问 npmmirror.com |
 | 浏览器打不开 | 手动打开浏览器访问 `http://localhost:18789` |
