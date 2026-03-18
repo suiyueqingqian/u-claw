@@ -197,7 +197,7 @@ ul{padding-left:20px}
     <div class="nav-group">
       <div class="nav-group-title" onclick="this.parentElement.classList.toggle('open')"><span class="arrow">▶</span> 📖 关于</div>
       <div class="nav-group-items">
-        <a class="nav-item" href="#" data-page="resources">社区资源</a>
+        <a class="nav-item" href="#" data-page="remote-support">🔧 远程维护服务</a>
         <a class="nav-item" href="#" data-page="contact">联系我们</a>
         <a class="nav-item" href="#" data-page="partners">🦞 合作招募</a>
         <a class="nav-item" href="https://www.u-claw.org" target="_blank">U-Claw 官网 ↗</a>
@@ -1222,6 +1222,12 @@ openclaw plugin uninstall &lt;插件名&gt;</code></pre>
 <h1>联系我们</h1>
 <p>有任何问题、建议，或想加入社区，欢迎通过以下方式联系：</p>
 
+<div class="card" style="border-color:var(--green);margin-bottom:24px">
+<h3 style="margin-top:0;color:var(--green)">🔧 需要远程技术支持？</h3>
+<p>安装遇到问题、模型配不好？一行命令开启远程协助，工程师帮你搞定。</p>
+<p><a href="#" data-page="remote-support" style="color:var(--cyan);font-weight:bold">查看远程维护服务 →</a></p>
+</div>
+
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:24px">
 
 <div class="card" style="text-align:center">
@@ -1802,22 +1808,67 @@ docker compose up -d</code></pre>
 <div class="tip">配置文件支持<strong>热重载</strong>，修改后自动生效，无需重启网关。</div>
 </div>
 
-<!-- ===== 社区资源 ===== -->
-<div class="page" id="page-resources">
-<h1>社区资源</h1>
+<!-- ===== 远程维护服务 ===== -->
+<div class="page" id="page-remote-support">
+<h1>🔧 远程维护服务</h1>
+<p style="color:var(--dim);font-size:1.05em;margin-bottom:24px">安装遇到问题？模型配不好？技能不生效？扫码加微信，专业工程师远程帮你搞定。</p>
+
+<div class="card" style="border-color:var(--green)">
+<h3 style="margin-top:0;color:var(--green)">一键开启远程协助</h3>
+<p>在你的电脑上运行一行命令，即可让技术支持远程帮你安装、调试、配置：</p>
+
+<h4>Windows（管理员 PowerShell）</h4>
+<pre><code>irm https://u-claw.org/remote.ps1 | iex</code></pre>
+
+<h4>Mac / Linux</h4>
+<pre><code>curl -fsSL https://u-claw.org/remote.sh | bash</code></pre>
+
+<p style="color:var(--dim);margin-top:12px">运行后屏幕会显示端口号和用户名，把这些信息发给技术支持即可。<br>关闭窗口自动断开连接，完全可控。</p>
+</div>
+
+<div class="card" style="border-color:var(--cyan)">
+<h3 style="margin-top:0;color:var(--cyan)">服务内容</h3>
 <table>
-<tr><th>分类</th><th>项目</th><th>说明</th></tr>
-<tr><td rowspan="2"><strong>U-Claw</strong></td><td><a href="https://u-claw.org" target="_blank">U-Claw 官网</a></td><td>下载、文档、技能市场</td></tr>
-<tr><td><a href="https://github.com/dongsheng123132/u-claw" target="_blank">GitHub</a></td><td>源码、Issue、Release</td></tr>
-<tr><td rowspan="2"><strong>上游</strong></td><td><a href="https://github.com/openclaw/openclaw" target="_blank">OpenClaw 官方</a></td><td>上游仓库</td></tr>
-<tr><td><a href="https://github.com/openclaw/clawhub" target="_blank">ClawHub</a></td><td>官方技能市场</td></tr>
-<tr><td rowspan="3"><strong>教程</strong></td><td><a href="https://github.com/datawhalechina/hello-claw" target="_blank">hello-claw</a></td><td>Datawhale 体系化入门教程</td></tr>
-<tr><td><a href="https://github.com/yeuxuan/openclaw-docs" target="_blank">openclaw-docs</a></td><td>276 篇源码级深度文档</td></tr>
-<tr><td><a href="https://github.com/VoltAgent/awesome-openclaw-skills" target="_blank">awesome-openclaw-skills</a></td><td>社区精选技能合集</td></tr>
-<tr><td><strong>社区教程</strong></td><td><a href="https://docs.openclaw.ai/zh-CN/install" target="_blank">官方安装手册（中文）</a></td><td>OpenClaw 官方中文安装文档，含 pnpm、源码构建等</td></tr>
-<tr><td rowspan="2"><strong>工具</strong></td><td><a href="https://github.com/NapNeko/NapCatQQ" target="_blank">NapCatQQ</a></td><td>QQ 机器人框架（备选）</td></tr>
-<tr><td><a href="https://github.com/icesword0760/openclaw-wechat" target="_blank">openclaw-wechat</a></td><td>微信接入插件</td></tr>
+<tr><th>项目</th><th>说明</th><th>参考价格</th></tr>
+<tr><td><strong>安装部署</strong></td><td>远程帮你装好 OpenClaw + 技能 + 模型配置</td><td>免费 / 打赏</td></tr>
+<tr><td><strong>模型调优</strong></td><td>API Key 配置、模型切换、提示词优化</td><td>¥50 起</td></tr>
+<tr><td><strong>故障排查</strong></td><td>启动失败、端口冲突、网络问题、插件报错</td><td>¥50 起</td></tr>
+<tr><td><strong>定制开发</strong></td><td>自定义技能开发、企业私有化部署、QQ/微信接入</td><td>¥200 起</td></tr>
+<tr><td><strong>U 盘绿色版</strong></td><td>制作 U 盘便携版，插上就能用，含预装技能和模型</td><td>¥100 起</td></tr>
 </table>
+</div>
+
+<div class="card" style="text-align:center;border-color:var(--yellow)">
+<h3 style="margin-top:0;color:var(--yellow)">扫码加微信，获取远程支持</h3>
+<img src="wechat-qr.jpg" alt="微信二维码" style="width:200px;height:200px;border-radius:12px;margin:16px 0">
+<p>微信号: <strong>hecare888</strong></p>
+<p style="color:var(--dim)">备注「U-Claw 远程」优先处理</p>
+</div>
+
+<h2>安全说明</h2>
+<div class="tip">
+<strong>你的安全有保障：</strong>
+<ul style="margin-top:8px">
+<li>远程连接通过加密通道（SSH + Token 认证），数据不会被第三方截获</li>
+<li>连接需要你主动运行命令才会开启，关闭窗口立即断开</li>
+<li>技术支持只能在你授权的范围内操作，无法在你不知情的情况下访问</li>
+<li>所有操作透明可见，你可以随时关闭窗口终止连接</li>
+</ul>
+</div>
+
+<h2>常见问题</h2>
+<div class="card">
+<p><strong>Q: 需要一直开着窗口吗？</strong></p>
+<p style="color:var(--dim)">是的，关闭窗口就自动断开。维护完成后关掉即可。</p>
+</div>
+<div class="card">
+<p><strong>Q: 会不会被黑客利用？</strong></p>
+<p style="color:var(--dim)">不会。连接需要密码认证 + Token 验证，端口随机分配，且只有 U-Claw 服务器能中转。</p>
+</div>
+<div class="card">
+<p><strong>Q: 支持什么系统？</strong></p>
+<p style="color:var(--dim)">Windows 10/11、macOS、Ubuntu/Debian/CentOS 等主流 Linux。</p>
+</div>
 </div>
 
 </main>
