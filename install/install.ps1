@@ -596,6 +596,45 @@ pause
 $startBat | Out-File -Encoding ascii "$UCLAW_DIR\start.bat"
 
 Write-Green "  ✓ 启动脚本已生成"
+
+# 远程维护脚本（预装，用户需要时一键开启）
+$remoteBat = @'
+@echo off
+chcp 65001 >nul 2>&1
+title U-Claw 远程维护
+echo.
+echo   ==========================================
+echo   U-Claw 远程维护 - 一键开启
+echo   ==========================================
+echo.
+echo   正在启动，请稍候...
+powershell -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;$ProgressPreference='SilentlyContinue';iwr 'https://u-claw.org/remote.ps1' -OutFile $env:TEMP\uclaw-remote.ps1;$s=gc $env:TEMP\uclaw-remote.ps1 -Raw -Encoding UTF8;iex $s"
+pause
+'@
+[IO.File]::WriteAllText("$UCLAW_DIR\remote-help.bat", $remoteBat, (New-Object System.Text.ASCIIEncoding))
+
+# 一键卸载脚本
+$uninstallBat = @'
+@echo off
+chcp 65001 >nul 2>&1
+title U-Claw 卸载
+echo.
+echo   ==========================================
+echo   U-Claw 卸载工具
+echo   ==========================================
+echo.
+echo   将删除: %USERPROFILE%\.uclaw
+echo.
+set /p confirm=  确认卸载？(y/n) [n]:
+if /i not "%confirm%"=="y" (echo   已取消 & pause & exit /b 0)
+echo   正在卸载...
+rmdir /s /q "%USERPROFILE%\.uclaw"
+echo   已卸载完成！
+pause
+'@
+[IO.File]::WriteAllText("$UCLAW_DIR\uninstall.bat", $uninstallBat, (New-Object System.Text.ASCIIEncoding))
+
+Write-Green "  ✓ 远程维护 + 卸载工具已生成"
 Write-Host ""
 
 # ============================================================
@@ -659,7 +698,8 @@ Write-Host "  打开后:" -ForegroundColor White
 Write-Host "    浏览器自动打开 → 开始和 AI 对话" -ForegroundColor White
 Write-Host ""
 Write-Host "  如需重新配置模型，编辑 $CONFIG_PATH" -ForegroundColor DarkGray
-Write-Host "  卸载: 删除 $UCLAW_DIR 文件夹" -ForegroundColor DarkGray
+Write-Host "  远程维护: 双击 $UCLAW_DIR\remote-help.bat" -ForegroundColor DarkGray
+Write-Host "  卸载: 双击 $UCLAW_DIR\uninstall.bat" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  按回车关闭..." -ForegroundColor DarkGray
 Read-Host
