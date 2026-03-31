@@ -32,7 +32,9 @@ U-Claw（虾盘）是一个**制作教程 + 全套源代码**，教你把 [OpenC
 >
 > 💡 **关于这个项目：** 我是产品经理，1个月前借助 AI 协助，针对国内环境打造了 U-Claw 虾盘——全球首个 U 盘形态的 OpenClaw，让 AI 即插即用。目前在快速迭代（也有不少 bug），2.0 正在重构，目标是做成一个真正可用的端侧 AI 产品。
 >
-> 🚀 AI 正在爆发，这是一个很少见的窗口期。与其围观，不如一起下场。
+> 🚀 AI 正在爆发，这是一个很少见的窗口期。与其围观，不如一起下场。虾盘只是开始，我们想做下一个真正影响世界的产品——AI 新入口级别的机会，值得 OpenAI、Meta 关注的那种。
+>
+> 🤝 **目前人手急缺**，诚邀技术极客和产品极客加入。不需要完美，需要有想法、敢下场、愿意一起把事情做成的人。
 >
 > 📩 微信：**hecare888**
 
@@ -238,7 +240,9 @@ The codebase itself is the USB file skeleton. Run `setup.sh` to download large d
 >
 > 💡 **About this project:** I'm a product manager who built U-Claw with AI assistance — the world's first OpenClaw in USB form, purpose-built for China. Still iterating fast (yes, there are bugs). V2.0 is being rebuilt into a truly production-ready edge AI product.
 >
-> 🚀 AI is exploding. This is a rare window. Stop watching — come build with us.
+> 🚀 AI is exploding. This is a rare window. Stop watching — come build with us. U-Claw is just the beginning. We're aiming for the next world-changing product — the kind of AI entry point that OpenAI or Meta would take notice of.
+>
+> 🤝 **We're urgently looking for builders** — tech hackers and product thinkers who have ideas, move fast, and want to make things happen.
 >
 > 📩 WeChat: **hecare888**
 
