@@ -22,14 +22,6 @@ U-Claw（虾盘）是一个**制作教程 + 全套源代码**，教你把 [OpenC
 
 > 📖 **[完整教程](https://u-claw.org/tutorial.html)** — 从零开始的手工安装指南、模型配置、聊天平台接入，小白也能看懂。
 
----
-
-> ⚠️ **新手提示：** 本仓库为开源 1.0 版本，构建需要一定的技术基础（Node.js / 命令行 / 脚本），不建议零基础用户贸然折腾。**想省事的话，推荐直接购买商业版（2.0）**，开箱即用。
->
-> 🚀 **2.0 商业版** 包含 U 盘内运行的**本地模型**（离线可用，无需 API），现已正式销售，附赠 AI 陪跑服务。淘宝 👉 [虾盘 U 盘（作者出品）](https://e.tb.cn/h.ij8LYYB0cZPkNHw?tk=FMo05XEJYk0)（口令 `HU293`）· 拼多多 👉 [点此购买](https://mobile.yangkeduo.com/goods1.html?ps=WaQeS00tDn)。📩 微信：**hecare888**
-
----
-
 ### 一键安装（推荐）
 
 不需要 U 盘，一行命令直接装到电脑：
@@ -129,7 +121,6 @@ npm run build:win        # 打包 → release/*.exe
 | MiniMax | 语音多模态 |
 | 豆包 Doubao | 火山引擎 |
 
-
 **国际模型：** Claude · GPT · Gemini（需翻墙或中转）
 
 ### 支持的聊天平台
@@ -174,15 +165,18 @@ bash Mac-Start.command   # Mac 测试
 
 ### 🦞 寻找技术伙伴
 
-**U-Claw 虾盘** 是一个快速成长的开源项目，目前已有不少商业合作机会。但作为产品经理的我，还无力独自承接更多的可能性。
+U-Claw 是一个快速成长的开源项目，目前已有不少商业合作机会。
 
-正在寻找：
+我们正在寻找：
 - **技术伙伴** — 全栈 / Node.js / Electron / 脚本自动化
 - **资源合作** — 渠道、内容、社区运营
 
 如果你对 AI 工具的落地和商业化感兴趣，欢迎联系：
 
-- 微信: **hecare888**
+- 微信: hecare888
+- Telegram: [@dsds8848](https://t.me/dsds8848)
+- Twitter/X: [@Bitplus888](https://x.com/Bitplus888)
+- Email: [hefangsheng@gmail.com](mailto:hefangsheng@gmail.com)
 - GitHub: [@dongsheng123132](https://github.com/dongsheng123132)
 - 官网: [u-claw.org](https://u-claw.org)
 
@@ -200,11 +194,70 @@ MIT 协议，随便复制分发。
 **Q: Mac 提示"未验证的开发者"？**
 右键脚本 → 打开。
 
-### 联系
+**Q: setup.bat / setup.sh 执行失败，提示模块找不到？**
+通常是 npm install 过程中网络中断导致 `node_modules` 不完整。解决步骤：
+1. 删除不完整的依赖：`rmdir /s /q portable\app\core\node_modules`（Windows）或 `rm -rf portable/app/core/node_modules`（Mac）
+2. 切换淘宝镜像重新安装：`cd portable/app/core && npm install --registry=https://registry.npmmirror.com`
 
-- 微信: hecare888
+**Q: 系统已有 Node.js v24，安装失败？**
+Node.js v24 是最新开发版，部分依赖尚不兼容。需要 **v20 或 v22 LTS**。删除已下载的 runtime 目录后重新运行 setup，它会自动下载内置的 Node v22：
+```bash
+# Windows
+rmdir /s /q portable\app\runtime\node-win-x64
+setup.bat
+
+# Mac
+rm -rf portable/app/runtime/node-mac-arm64
+bash setup.sh
+```
+
+**Q: Mac 上提示 `.toSorted is not a function`？**
+系统旧版 Node.js 被检测到并跳过了内置版本下载，但旧版 Node 不支持 `.toSorted()`（需要 v20+）。删除 runtime 目录让脚本重新下载内置 Node v22：
+```bash
+rm -rf portable/app/runtime/node-mac-arm64
+bash setup.sh
+```
+
+**Q: 如何同时配置多个 AI 模型并切换？**
+支持同时配置多个 provider！打开 `Config.html` → 在 Providers 区域点击「添加」，逐个填入各模型的 API Key 和地址（如 DeepSeek、Kimi、通义等）→ 保存后，在聊天界面左上角下拉菜单随时切换。配置持久保存在 U 盘上。
+
+**Q: U 盘安装后无法创建文件 / 写入失败？**
+两种可能：① U 盘侧面有物理写保护开关，拨到解锁位置；② U 盘格式不兼容，建议格式化为 **exFAT**（Mac/Windows/Linux 三端均支持读写）。
+
+**Q: 从 Ubuntu 向 U 盘复制时符号链接丢失？**
+`node_modules/.bin/` 下有大量符号链接，FAT32/exFAT 在直接 `cp -R` 时会跳过。用 `rsync -aL` 可将符号链接展开为真实文件：
+```bash
+rsync -aL --progress portable/ /media/YOUR_USB/U-Claw/
+```
+
+**Q: QQbot 报错 `Unknown channel: qqbot`？**
+Bundle 里的 `@sliverp/qqbot` 是未编译的 TypeScript 源码，需要先编译：
+```bash
+cd portable/app/core/node_modules/@sliverp/qqbot
+npm install && npm run build
+```
+正式 Release 包已修复此问题，建议从 [Releases](https://github.com/dongsheng123132/u-claw/releases) 下载最新版。
+
+### 联系 & 合作
+
+<img src="assets/wechat-qr.jpg" width="220" alt="微信二维码 — 贺去病 ai 工作室" align="right" />
+
+- 微信: hecare888（或扫右侧二维码）
+- Telegram: [@dsds8848](https://t.me/dsds8848)
+- Twitter/X: [@Bitplus888](https://x.com/Bitplus888)
+- Email: [hefangsheng@gmail.com](mailto:hefangsheng@gmail.com)
 - GitHub: [@dongsheng123132](https://github.com/dongsheng123132)
 - 官网: [u-claw.org](https://u-claw.org)
+
+**🤝 招募代理 / 带货合作**
+
+虾盘 3.0 体验极佳，退货率极低，售后由我们负责——你只管卖货：
+
+- **抖店 / 直播带货**：提供最高佣金比例，产品已在多个直播间验证转化
+- **代理分销**：买断或按单分润均可谈，支持定制版本
+- **技术合作**：有开发能力者欢迎深度合作
+
+有意向请微信联系（备注「代理合作」优先处理）。
 
 ---
 
@@ -219,14 +272,6 @@ U-Claw (aka "虾盘" / "Xia Pan" in Chinese, meaning "Claw Drive") is a **tutori
 The codebase itself is the USB file skeleton. Run `setup.sh` to download large dependencies, then copy the entire `portable/` directory to a USB drive.
 
 > 📖 **[Full Tutorial](https://u-claw.org/tutorial.html)** — Step-by-step manual installation, model setup, chat platform integration.
-
----
-
-> ⚠️ **Heads up for beginners:** This repo is the open-source 1.0 version. Building it requires technical knowledge (Node.js / CLI / scripting). If you just want something that works, **we recommend the commercial 2.0 edition** — no setup needed.
->
-> 🚀 **Version 2.0** features **on-device local models** (offline, no API key needed), now available — includes AI onboarding support. Taobao 👉 [U-Claw USB Drive (by author)](https://e.tb.cn/h.ij8LYYB0cZPkNHw?tk=FMo05XEJYk0) (code `HU293`) · Pinduoduo 👉 [Buy here](https://mobile.yangkeduo.com/goods1.html?ps=WaQeS00tDn). 📩 WeChat: **hecare888**
-
----
 
 ### One-Line Install (Recommended)
 
@@ -395,16 +440,19 @@ WeChat: **hecare888** (备注「U-Claw 远程」优先处理)
 
 ### 🦞 Looking for Partners
 
-**U-Claw** is a fast-growing open-source project with real commercial opportunities already on the table. But as a solo product manager, I can't capture them alone.
+U-Claw is a fast-growing open-source project with real commercial opportunities.
 
-Looking for:
-- **Technical partners** — Full-stack / Node.js / Electron / scripting & automation
-- **Resource partners** — Distribution channels, content creation, community ops
+We're looking for:
+- **Technical partners** — Full-stack / Node.js / Electron / scripting
+- **Resource partners** — Distribution, content, community
 
-If you're excited about bringing AI tools to market, let's talk:
+If you're interested in AI tooling and commercialization, let's talk:
 
-- WeChat: **hecare888**
+- Telegram: [@dsds8848](https://t.me/dsds8848)
+- Twitter/X: [@Bitplus888](https://x.com/Bitplus888)
+- Email: [hefangsheng@gmail.com](mailto:hefangsheng@gmail.com)
 - GitHub: [@dongsheng123132](https://github.com/dongsheng123132)
+- WeChat: hecare888
 - Website: [u-claw.org](https://u-claw.org)
 
 ### FAQ
@@ -421,12 +469,71 @@ MIT license — copy and share freely.
 **Q: Mac says "unverified developer"?**
 Right-click the script → Open.
 
-### Contact
+**Q: setup.bat / setup.sh fails with "module not found"?**
+Usually caused by a network interruption during `npm install`, leaving `node_modules` incomplete. Fix:
+1. Delete incomplete dependencies: `rmdir /s /q portable\app\core\node_modules` (Windows) or `rm -rf portable/app/core/node_modules` (Mac)
+2. Reinstall using China mirror: `cd portable/app/core && npm install --registry=https://registry.npmmirror.com`
 
-- WeChat: hecare888
+**Q: Already have Node.js v24 and installation fails?**
+Node.js v24 is a dev release — some dependencies aren't compatible yet. You need **v20 or v22 LTS**. Delete the runtime folder to force a fresh download of the bundled Node v22:
+```bash
+# Windows
+rmdir /s /q portable\app\runtime\node-win-x64
+setup.bat
+
+# Mac
+rm -rf portable/app/runtime/node-mac-arm64
+bash setup.sh
+```
+
+**Q: Mac shows `.toSorted is not a function`?**
+Your system Node.js was detected and the bundled version was skipped, but the system version is too old (needs v20+). Delete the runtime folder to re-download the bundled Node v22:
+```bash
+rm -rf portable/app/runtime/node-mac-arm64
+bash setup.sh
+```
+
+**Q: How do I use multiple AI models / providers?**
+Multiple providers are supported! Open `Config.html` → click "Add" in the Providers section → enter API Key and endpoint for each model (DeepSeek, Kimi, Qwen, etc.) → save. Switch between models via the dropdown in the chat interface. Config is saved persistently on the USB drive.
+
+**Q: USB drive shows "cannot create file" / write errors?**
+Two possibilities: ① The USB drive has a physical write-protect switch on the side — slide it to unlock; ② Format incompatibility — format the drive as **exFAT** (supported on Mac/Windows/Linux).
+
+**Q: Symlinks missing when copying from Ubuntu to USB?**
+`node_modules/.bin/` contains many symlinks that get skipped during direct `cp -R`. Use `rsync -aL` to expand symlinks into real files:
+```bash
+rsync -aL --progress portable/ /media/YOUR_USB/U-Claw/
+```
+
+**Q: QQbot error: `Unknown channel: qqbot`?**
+The bundled `@sliverp/qqbot` is uncompiled TypeScript source. Compile it manually:
+```bash
+cd portable/app/core/node_modules/@sliverp/qqbot
+npm install && npm run build
+```
+This is fixed in the latest [Release](https://github.com/dongsheng123132/u-claw/releases) — downloading the pre-built release is recommended.
+
+### Contact & Partnership
+
+<img src="assets/wechat-qr.jpg" width="220" alt="WeChat QR — He Qubing AI Studio" align="right" />
+
+- WeChat: hecare888 (or scan QR on the right)
+- Telegram: [@dsds8848](https://t.me/dsds8848)
+- Twitter/X: [@Bitplus888](https://x.com/Bitplus888)
+- Email: [hefangsheng@gmail.com](mailto:hefangsheng@gmail.com)
 - GitHub: [@dongsheng123132](https://github.com/dongsheng123132)
 - Website: [u-claw.org](https://u-claw.org)
 
+**🤝 Reseller / Affiliate Program**
+
+U-Claw 3.0 delivers excellent user experience with very low return rates. We handle all after-sales support — you focus on selling:
+
+- **Live commerce / TikTok shop**: Top commission rates, proven conversion in live streams
+- **Reseller / distribution**: Revenue share or wholesale, custom branded versions available
+- **Technical partnership**: Deep collaboration welcome for developers
+
+Interested? WeChat hecare888 (mention "partnership" for priority response).
+
 ---
 
-**Made with 🦞 by [dongsheng](https://github.com/dongsheng123132)**
+**Made with 🦞 by [贺去病 ai 工作室](https://github.com/dongsheng123132)**

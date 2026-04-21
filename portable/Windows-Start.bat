@@ -49,7 +49,7 @@ if not exist "%DATA_DIR%\logs" mkdir "%DATA_DIR%\logs"
 REM Default config
 if not exist "%STATE_DIR%\openclaw.json" (
     echo   First run - creating default config...
-    echo {"gateway":{"mode":"local","auth":{"token":"uclaw"}}} > "%STATE_DIR%\openclaw.json"
+    (echo {"gateway":{"mode":"local","auth":{"token":"uclaw"}}})>"%STATE_DIR%\openclaw.json"
     echo   Config created
     echo.
 )
@@ -69,6 +69,19 @@ if not exist "%CORE_DIR%\node_modules" (
     echo.
     echo   Dependencies installed!
     echo.
+)
+
+REM Auto-install WeChat plugin if available
+set "WECHAT_PLUGIN_SRC=%APP_DIR%\extensions\openclaw-weixin"
+set "WECHAT_PLUGIN_DST=%USERPROFILE%\.openclaw\extensions\openclaw-weixin"
+if exist "%WECHAT_PLUGIN_SRC%\openclaw.plugin.json" (
+    if not exist "%WECHAT_PLUGIN_DST%\openclaw.plugin.json" (
+        echo   Installing WeChat plugin...
+        mkdir "%USERPROFILE%\.openclaw\extensions" 2>nul
+        xcopy /s /e /q /y "%WECHAT_PLUGIN_SRC%" "%WECHAT_PLUGIN_DST%\" >nul
+        echo   WeChat plugin installed!
+        echo.
+    )
 )
 
 REM Find available port
