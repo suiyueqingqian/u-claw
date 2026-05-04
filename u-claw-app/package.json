@@ -1,19 +1,20 @@
 {
   "name": "u-claw",
-  "version": "2.0.0",
+  "version": "2.1.2",
   "description": "U-Claw - AI 助手桌面版，插上 U 盘就能用",
   "main": "src/main.js",
   "author": "U-Claw <hello@u-claw.org> (https://u-claw.org)",
   "license": "MIT",
   "homepage": "https://u-claw.org",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron . --dev",
-    "build:mac": "electron-builder --mac",
-    "build:mac-arm64": "electron-builder --mac --arm64",
-    "build:mac-x64": "electron-builder --mac --x64",
-    "build:win": "electron-builder --win",
-    "build:all": "electron-builder --mac --win",
+    "sync-lib": "node scripts/sync-lib.js",
+    "start": "npm run sync-lib && electron .",
+    "dev": "npm run sync-lib && electron . --dev",
+    "build:mac": "npm run sync-lib && electron-builder --mac",
+    "build:mac-arm64": "npm run sync-lib && electron-builder --mac --arm64",
+    "build:mac-x64": "npm run sync-lib && electron-builder --mac --x64",
+    "build:win": "npm run sync-lib && electron-builder --win",
+    "build:all": "npm run sync-lib && electron-builder --mac --win",
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {

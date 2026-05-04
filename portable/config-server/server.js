@@ -5,8 +5,10 @@ const path = require('path');
 const { deflateSync } = require('zlib');
 const crypto = require('crypto');
 
-const PORT = 18788;
+const PORT_RANGE_START = 18788;
+const PORT_RANGE_END = 18798;
 const CONFIG_PATH = path.join(__dirname, '../data/.openclaw/openclaw.json');
+const RUNTIME_PATH = path.join(__dirname, '../data/.openclaw/runtime.json');
 
 // ── WeChat Login State ──────────────────────────────────────────────────────
 const DEFAULT_WECHAT_BASE_URL = 'https://ilinkai.weixin.qq.com';
@@ -391,6 +393,71 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // API: Xiapan Cloud status (fingerprint + apiKey + balance)
+  if (req.url === '/api/xiapan/status' && req.method === 'GET') {
+    (async () => {
+      try {
+        const fpMod = await import('../lib/fingerprint.mjs');
+        const xpMod = await import('../lib/xiapan-client.mjs');
+        const portableRoot = path.join(__dirname, '..');
+        const fp = await fpMod.getFingerprint(portableRoot);
+        const apiKey = xpMod.buildApiKey(fp.fingerprint);
+        const balance = await xpMod.getBalance(apiKey);
+        const rechargeUrl = xpMod.getRechargeUrl(apiKey);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          source: fp.source,
+          apiKey,
+          rechargeUrl,
+          balance,
+        }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    })();
+    return;
+  }
+
+  // API: Re-run bootstrap to inject the uclaw-cloud provider
+  if (req.url === '/api/xiapan/bind' && req.method === 'POST') {
+    (async () => {
+      try {
+        const mod = await import('../lib/bootstrap-xiapan.mjs');
+        const portableRoot = path.join(__dirname, '..');
+        const result = await mod.bootstrapXiapan({
+          configPath: CONFIG_PATH,
+          appRoot: portableRoot,
+        });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    })();
+    return;
+  }
+
+  // API: Remove uclaw-cloud provider so the next bind regenerates it
+  if (req.url === '/api/xiapan/unbind' && req.method === 'POST') {
+    try {
+      if (fs.existsSync(CONFIG_PATH)) {
+        const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+        if (config.models && config.models.providers && config.models.providers['uclaw-cloud']) {
+          delete config.models.providers['uclaw-cloud'];
+          fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+        }
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
   // API: Save config
   if (req.url === '/api/config' && req.method === 'POST') {
     let body = '';
@@ -435,8 +502,31 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`\n🦞 U-Claw Config Center`);
-  console.log(`   http://127.0.0.1:${PORT}`);
-  console.log(`\n   Config file: ${CONFIG_PATH}\n`);
-});
+function listenWithFallback(port) {
+  server.once('error', (err) => {
+    if (err && err.code === 'EADDRINUSE' && port < PORT_RANGE_END) {
+      console.log(`   Port ${port} busy, trying ${port + 1}…`);
+      setImmediate(() => listenWithFallback(port + 1));
+      return;
+    }
+    console.error(`Config server failed to bind: ${err && err.message ? err.message : err}`);
+    process.exit(1);
+  });
+  server.listen(port, '127.0.0.1', () => {
+    console.log(`\n🦞 U-Claw Config Center`);
+    console.log(`   http://127.0.0.1:${port}`);
+    console.log(`\n   Config file: ${CONFIG_PATH}\n`);
+    // Persist the live port so Config.html / launchers can discover it after restarts.
+    try {
+      fs.mkdirSync(path.dirname(RUNTIME_PATH), { recursive: true });
+      const existing = fs.existsSync(RUNTIME_PATH) ? JSON.parse(fs.readFileSync(RUNTIME_PATH, 'utf8')) : {};
+      existing.configServerPort = port;
+      existing.configServerUpdatedAt = new Date().toISOString();
+      fs.writeFileSync(RUNTIME_PATH, JSON.stringify(existing, null, 2));
+    } catch (err) {
+      console.warn(`   Warning: could not write ${RUNTIME_PATH}: ${err.message}`);
+    }
+  });
+}
+
+listenWithFallback(PORT_RANGE_START);
