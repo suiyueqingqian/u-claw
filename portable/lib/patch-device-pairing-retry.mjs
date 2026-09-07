@@ -6,8 +6,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const EXPECTED_VERSION = '2026.9.1';
-const EXPECTED_SHA256 = '4ff2e368c8273b084a9779e36f2ddae02be6c92d2c7201187e62acf0a433aa32';
+const EXPECTED_VERSION = '2026.9.2';
+const EXPECTED_SHA256 = 'dc84bdfa3518a168f26b19b9fa47fb1e2c41fb918cce854dd8fbf04637571ee4';
 // 2026.9.1 起重试逻辑下沉到 @openclaw/fs-safe 包内（openclaw/dist/replace-file-*.js
 // 只是 485 字节的 re-export shim），patch 目标改为包内真实文件。
 const BUNDLE = 'node_modules/@openclaw/fs-safe/dist/replace-file.js';
