@@ -19,6 +19,9 @@ set "NPM_BIN=%NODE_DIR%\npm.cmd"
 set "OPENCLAW_HOME=%DATA_DIR%"
 set "OPENCLAW_STATE_DIR=%STATE_DIR%"
 set "OPENCLAW_CONFIG_PATH=%STATE_DIR%\openclaw.json"
+REM U-Claw opens the local dashboard directly; disable mDNS discovery on Windows
+REM to avoid OpenClaw/@homebridge ciao crashes during bonjour re-advertise.
+set "OPENCLAW_DISABLE_BONJOUR=1"
 set "PATH=%NODE_DIR%;%PATH%"
 
 set "OPENCLAW_MJS=%CORE_DIR%\node_modules\openclaw\openclaw.mjs"
@@ -68,10 +71,11 @@ echo   [12] Uninstall
 echo   [13] Check for updates
 echo   [14] Disk cleanup
 echo   [15] Plugin management
+echo   [16] Open CLI terminal (openclaw chat/configure/doctor)
 echo.
 echo   [0] Exit
 echo.
-set /p choice="  Choose [0-15]: "
+set /p choice="  Choose [0-16]: "
 
 if "%choice%"=="1" goto :onboard
 if "%choice%"=="2" goto :dashboard
@@ -88,6 +92,7 @@ if "%choice%"=="12" goto :uninstall
 if "%choice%"=="13" goto :checkupdate
 if "%choice%"=="14" goto :diskcleanup
 if "%choice%"=="15" goto :plugins
+if "%choice%"=="16" goto :clitool
 if "%choice%"=="0" exit /b 0
 echo   Invalid choice
 pause
@@ -167,7 +172,7 @@ echo   === Other Platforms ===
 echo.
 echo   [a] Feishu (Lark)    - Enterprise
 echo   [b] Telegram          - International
-echo   [c] WeChat (plugin)   - iPad protocol
+echo   [c] WeChat (plugin)   - iPad protocol (unavailable)
 echo   [d] Discord
 echo.
 set /p ch_choice="  Choose (a-d, empty to cancel): "
@@ -187,10 +192,9 @@ if "%ch_choice%"=="b" (
 )
 if "%ch_choice%"=="c" (
     echo.
-    echo   Installing WeChat plugin...
-    cd /d "%CORE_DIR%"
-    "%NODE_BIN%" "%OPENCLAW_MJS%" plugins install @icesword760/openclaw-wechat
-    echo   WeChat plugin installed!
+    echo   WeChat plugin is temporarily unavailable:
+    echo   upstream module-loading compatibility issue - see config-server WECHAT_ENABLED.
+    echo   Skip setup until upstream publishes a fix.
 )
 if "%ch_choice%"=="d" (
     echo.
@@ -474,12 +478,12 @@ echo   Fetching latest version...
 for /f "tokens=*" %%v in ('"%NODE_BIN%" -e "const https=require('https');https.get('https://registry.npmmirror.com/openclaw/latest',r=>{let d='';r.on('data',c=>d+=c);r.on('end',()=>{try{console.log(JSON.parse(d).version)}catch(e){console.log('error')}})})" 2^>nul') do set LATEST_VER=%%v
 
 if "!LATEST_VER!"=="" (
-    echo   Could not fetch latest version (network issue?)
+    echo   Could not fetch latest version ^(network issue?^)
     pause
     goto :menu
 )
 if "!LATEST_VER!"=="error" (
-    echo   Could not fetch latest version (network issue?)
+    echo   Could not fetch latest version ^(network issue?^)
     pause
     goto :menu
 )
@@ -547,7 +551,7 @@ if !BK_COUNT! gtr 3 (
         echo   Cleaned !DEL_NUM! old backups.
     )
 ) else (
-    echo   Backups: !BK_COUNT! (no cleanup needed)
+    echo   Backups: !BK_COUNT! ^(no cleanup needed^)
 )
 
 REM Clean old logs (>7 days)
@@ -595,7 +599,7 @@ if "%plgchoice%"=="b" (
     echo.
     echo   Common plugins:
     echo     @icesword760/openclaw-wechat  - WeChat
-    echo     @nicepkg/openclaw-plugin-qq   - QQ (community)
+    echo     @nicepkg/openclaw-plugin-qq   - QQ ^(community^)
     echo.
     set /p plgname="  Plugin name (empty to cancel): "
     if not "!plgname!"=="" (
@@ -623,5 +627,15 @@ if "%plgchoice%"=="c" (
         echo   Cancelled.
     )
 )
+pause
+goto :menu
+
+:clitool
+echo.
+echo   === CLI Terminal ===
+echo.
+echo   Opening a new window with 'openclaw' commands ready to use
+echo   (chat / configure / doctor / gateway status)...
+start "" "%UCLAW_DIR%OpenClaw-CLI.bat"
 pause
 goto :menu

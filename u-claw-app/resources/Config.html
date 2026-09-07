@@ -48,16 +48,51 @@ h1 .lobster { color: #ff6b35; }
 .buy-link:hover { text-decoration: underline; }
 
 /* Forms */
-.form-group { margin-bottom: 16px; }
-label { display: block; color: #ccc; margin-bottom: 6px; font-size: 0.9em; }
-input[type="text"], input[type="password"] {
-    width: 100%; padding: 11px 14px; background: #222; border: 1px solid #444; border-radius: 8px;
-    color: #fff; font-size: 0.95em; outline: none; transition: border-color 0.2s;
+.form-group { display: block; margin-bottom: 16px; clear: both; }
+.form-group label {
+    display: block;
+    width: auto;
+    float: none;
+    color: #ccc;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+.form-group input,
+input[type="text"],
+input[type="password"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 11px 14px;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95em;
+    line-height: 1.3;
+    outline: none;
+    transition: border-color 0.2s;
 }
 input:focus { border-color: #ff6b35; }
-.input-wrap { position: relative; }
-.input-wrap input { padding-right: 44px; }
-.toggle-pw { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; font-size: 0.85em; }
+.input-wrap { position: relative; display: block; width: 100%; min-width: 0; }
+.input-wrap input { padding-right: 64px; }
+.toggle-pw {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    min-width: 38px;
+    height: 30px;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 0.82em;
+    line-height: 28px;
+    text-align: center;
+}
 .toggle-pw:hover { color: #ccc; }
 .hint { color: #888; font-size: 0.8em; margin-top: 6px; line-height: 1.5; }
 .hint a { color: #ff6b35; text-decoration: none; }
@@ -126,26 +161,32 @@ input:focus { border-color: #ff6b35; }
     <!-- Step 1: Select Model -->
     <div class="section active" id="step1">
         <h2>选择 AI 模型</h2>
-        <p class="desc">选择你要使用的模型，推荐国内用户用 MiniMax / Kimi / DeepSeek</p>
+        <p class="desc">最省心：用「虾盘云」一个 Key 调用国内外全部大模型（中转站）。也可用下面各家自己的官方 Key。</p>
 
         <div class="model-grid">
-            <div class="model-card" data-provider="minimax" data-base="https://api.minimax.chat/v1" data-model="MiniMax-Text-01">
+            <div class="model-card" data-provider="uclaw-cloud" data-base="https://api.u-claw.org/v1" data-model="deepseek-v4-pro">
                 <span class="check">✓</span>
-                <h4>MiniMax <span class="tag hot">推荐</span><span class="tag cn">国内</span></h4>
-                <p>MiniMax-Text-01，速度快，性价比高</p>
-                <a class="buy-link" href="https://platform.minimaxi.com/" target="_blank">→ 获取 API Key</a>
+                <h4>虾盘云 <span class="tag hot">首选</span><span class="tag">中转站</span></h4>
+                <p>一个 Key 用 DeepSeek / Claude / GPT / 通义 等国内外全部大模型，无需翻墙</p>
+                <a class="buy-link" href="https://u-claw.org/cloud.html" target="_blank">→ 注册并获取 API Key</a>
             </div>
-            <div class="model-card" data-provider="kimi" data-base="https://api.moonshot.cn/v1" data-model="moonshot-v1-auto">
-                <span class="check">✓</span>
-                <h4>Kimi (月之暗面) <span class="tag cn">国内</span><span class="tag fast">快</span></h4>
-                <p>moonshot-v1-auto，智能选模型</p>
-                <a class="buy-link" href="https://platform.moonshot.cn/" target="_blank">→ 获取 API Key</a>
-            </div>
-            <div class="model-card" data-provider="deepseek" data-base="https://api.deepseek.com/v1" data-model="deepseek-chat">
+            <div class="model-card" data-provider="deepseek" data-base="https://api.deepseek.com/v1" data-model="deepseek-v4-flash">
                 <span class="check">✓</span>
                 <h4>DeepSeek <span class="tag cn">国内</span><span class="tag cheap">便宜</span></h4>
-                <p>deepseek-chat，超低价格</p>
+                <p>deepseek-v4-flash / deepseek-v4-pro，超低价格</p>
                 <a class="buy-link" href="https://platform.deepseek.com/" target="_blank">→ 获取 API Key</a>
+            </div>
+            <div class="model-card" data-provider="minimax" data-base="https://api.minimax.chat/v1" data-model="MiniMax-M2">
+                <span class="check">✓</span>
+                <h4>MiniMax <span class="tag cn">国内</span></h4>
+                <p>MiniMax-M2，速度快，性价比高</p>
+                <a class="buy-link" href="https://platform.minimaxi.com/" target="_blank">→ 获取 API Key</a>
+            </div>
+            <div class="model-card" data-provider="kimi" data-base="https://api.moonshot.cn/v1" data-model="kimi-k2-turbo-preview">
+                <span class="check">✓</span>
+                <h4>Kimi (月之暗面) <span class="tag cn">国内</span><span class="tag fast">快</span></h4>
+                <p>kimi-k2，长上下文强</p>
+                <a class="buy-link" href="https://platform.moonshot.cn/" target="_blank">→ 获取 API Key</a>
             </div>
             <div class="model-card" data-provider="zai" data-base="" data-model="glm-5">
                 <span class="check">✓</span>
@@ -153,28 +194,28 @@ input:focus { border-color: #ff6b35; }
                 <p>glm-5（zai provider），免费额度可用</p>
                 <a class="buy-link" href="https://open.bigmodel.cn/" target="_blank">→ 获取 API Key</a>
             </div>
-            <div class="model-card" data-provider="qwen" data-base="https://dashscope.aliyuncs.com/compatible-mode/v1" data-model="qwen-turbo">
+            <div class="model-card" data-provider="qwen" data-base="https://dashscope.aliyuncs.com/compatible-mode/v1" data-model="qwen-plus">
                 <span class="check">✓</span>
                 <h4>通义千问 <span class="tag cn">国内</span><span class="tag free">有免费</span></h4>
-                <p>qwen-turbo，阿里云出品</p>
+                <p>qwen-plus / qwen3-max，阿里云出品</p>
                 <a class="buy-link" href="https://dashscope.console.aliyun.com/" target="_blank">→ 获取 API Key</a>
             </div>
-            <div class="model-card" data-provider="doubao" data-base="https://ark.cn-beijing.volces.com/api/v3" data-model="doubao-1.5-pro-32k">
+            <div class="model-card" data-provider="doubao" data-base="https://ark.cn-beijing.volces.com/api/v3" data-model="doubao-seed-1-6-250615">
                 <span class="check">✓</span>
                 <h4>豆包 (字节) <span class="tag cn">国内</span><span class="tag fast">快</span></h4>
-                <p>doubao-1.5-pro，字节跳动</p>
+                <p>doubao-seed-1.6，字节跳动</p>
                 <a class="buy-link" href="https://console.volcengine.com/ark" target="_blank">→ 获取 API Key</a>
             </div>
-            <div class="model-card" data-provider="openai" data-base="https://api.openai.com/v1" data-model="gpt-4o">
+            <div class="model-card" data-provider="openai" data-base="https://api.openai.com/v1" data-model="gpt-5.4">
                 <span class="check">✓</span>
                 <h4>OpenAI <span class="tag hot">强</span></h4>
-                <p>GPT-4o，需翻墙或中转</p>
+                <p>GPT-5.4，需翻墙或中转</p>
                 <a class="buy-link" href="https://platform.openai.com/" target="_blank">→ 获取 API Key</a>
             </div>
-            <div class="model-card" data-provider="anthropic" data-base="https://api.anthropic.com/v1" data-model="claude-sonnet-4-20250514">
+            <div class="model-card" data-provider="anthropic" data-base="https://api.anthropic.com/v1" data-model="claude-opus-4-6">
                 <span class="check">✓</span>
                 <h4>Claude <span class="tag hot">强</span></h4>
-                <p>Claude Sonnet 4，需翻墙或中转</p>
+                <p>Claude Opus 4.6 / Sonnet 4.6，需翻墙或中转</p>
                 <a class="buy-link" href="https://console.anthropic.com/" target="_blank">→ 获取 API Key</a>
             </div>
             <div class="model-card" data-provider="groq" data-base="https://api.groq.com/openai/v1" data-model="llama-3.3-70b-versatile">
@@ -359,10 +400,10 @@ let selectedBase = '';
 let selectedModel = '';
 
 // --- Model cards ---
-document.querySelectorAll('.model-card').forEach(card => {
+document.querySelectorAll('#step1 .model-card').forEach(card => {
     card.addEventListener('click', (e) => {
         if (e.target.closest('.buy-link')) return; // don't select when clicking buy link
-        document.querySelectorAll('.model-card').forEach(c => c.classList.remove('selected'));
+        document.querySelectorAll('#step1 .model-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
         selectedProvider = card.dataset.provider;
         selectedBase = card.dataset.base;
@@ -371,11 +412,13 @@ document.querySelectorAll('.model-card').forEach(card => {
     });
 });
 
-document.getElementById('nextStep1').addEventListener('click', () => goStep(2));
+document.getElementById('nextStep1').addEventListener('click', () => {
+    goStep(2);
+});
 
 // --- Steps ---
 function goStep(n) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.section:not(.skills-section)').forEach(s => s.classList.remove('active'));
     document.getElementById('step' + n).classList.add('active');
     // Keep skills section visible
     document.querySelectorAll('.steps .step').forEach((s, i) => {
@@ -392,8 +435,8 @@ function setupStep2() {
     document.getElementById('customFields').style.display = isCustom ? 'block' : 'none';
 
     const providerNames = {
-        minimax: 'MiniMax', kimi: 'Kimi (月之暗面)', deepseek: 'DeepSeek',
-        zhipu: '智谱 GLM', qwen: '通义千问', doubao: '豆包',
+        'uclaw-cloud': '虾盘云', minimax: 'MiniMax', kimi: 'Kimi (月之暗面)', deepseek: 'DeepSeek',
+        zai: '智谱 GLM', qwen: '通义千问', doubao: '豆包',
         openai: 'OpenAI', anthropic: 'Anthropic Claude', groq: 'Groq',
         siliconflow: '硅基流动', custom: '自定义'
     };
@@ -401,7 +444,7 @@ function setupStep2() {
     document.getElementById('step2desc').textContent = `请填写 ${name} 的 API Key`;
 
     // Buy links
-    const card = document.querySelector(`.model-card[data-provider="${selectedProvider}"]`);
+    const card = document.querySelector(`#step1 .model-card[data-provider="${selectedProvider}"]`);
     const buyLink = card ? card.querySelector('.buy-link') : null;
     const linksDiv = document.getElementById('providerLinks');
     linksDiv.innerHTML = '';
@@ -428,7 +471,7 @@ function togglePw() {
 function buildOpenClawConfig(provider, base, model, apiKey) {
     // Base config that OpenClaw expects
     const baseConfig = {
-        gateway: { auth: { mode: 'token', token: 'uclaw', scopes: ['operator.admin'] } },
+        gateway: { auth: { mode: 'token', token: 'uclaw' }, remote: { token: 'uclaw' } },
         commands: { native: 'auto', nativeSkills: 'auto', restart: true, ownerDisplay: 'raw' },
         meta: { lastTouchedVersion: '2026.3.13', lastTouchedAt: new Date().toISOString() }
     };

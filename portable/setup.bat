@@ -9,7 +9,7 @@ set "CORE_DIR=%APP_DIR%\core"
 set "RUNTIME_DIR=%APP_DIR%\runtime"
 set "MIRROR=https://registry.npmmirror.com"
 set "NODE_MIRROR=https://npmmirror.com/mirrors/node"
-set "NODE_VERSION=v22.22.1"
+set "NODE_VERSION=v22.22.3"
 set "ALL_PLATFORMS=false"
 if "%~1"=="--all-platforms" set "ALL_PLATFORMS=true"
 
@@ -105,8 +105,19 @@ if exist "%CORE_DIR%\node_modules\openclaw" goto skip_openclaw_install
 echo   [INSTALL] Installing OpenClaw...
 if not exist "%CORE_DIR%" mkdir "%CORE_DIR%" 2>nul
 
+REM Read pinned OpenClaw version from portable root, then repo root in dev checkouts
+set "OPENCLAW_VERSION_FILE=%~dp0OPENCLAW_VERSION"
+if not exist "%OPENCLAW_VERSION_FILE%" set "OPENCLAW_VERSION_FILE=%~dp0..\OPENCLAW_VERSION"
+set "OPENCLAW_VERSION=2026.4.29"
+if exist "%OPENCLAW_VERSION_FILE%" (
+    for /f "usebackq delims=" %%v in ("%OPENCLAW_VERSION_FILE%") do set "OPENCLAW_VERSION=%%v"
+)
+REM Copy version file into portable/ so USB users can read it without repo root
+if exist "%OPENCLAW_VERSION_FILE%" (
+    copy /y "%OPENCLAW_VERSION_FILE%" "%~dp0OPENCLAW_VERSION" >nul 2>&1
+)
 if not exist "%CORE_DIR%\package.json" (
-    echo { "name": "u-claw-core", "version": "1.0.0", "private": true, "dependencies": { "openclaw": "latest" } } > "%CORE_DIR%\package.json"
+    echo { "name": "u-claw-core", "version": "1.0.0", "private": true, "dependencies": { "openclaw": "%OPENCLAW_VERSION%" } } > "%CORE_DIR%\package.json"
 )
 
 cd /d "%CORE_DIR%"

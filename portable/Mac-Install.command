@@ -18,7 +18,7 @@ NC='\033[0m'
 BOLD='\033[1m'
 DIM='\033[2m'
 
-NODE_VER="v22.14.0"
+NODE_VER="v22.22.3"
 MIRROR="https://registry.npmmirror.com"
 NODE_MIRROR="https://npmmirror.com/mirrors/node"
 
@@ -176,6 +176,25 @@ PKGEOF
         echo -e "  ${GREEN}OpenClaw 下载安装完成 ✓${NC}"
         ;;
 esac
+
+# ---- Stage WeChat plugin into the dir OpenClaw actually reads ----
+# OpenClaw loads extensions ONLY from OPENCLAW_STATE_DIR/extensions; start.command
+# points STATE_DIR at $INSTALL_TARGET/data/.openclaw, so the plugin must live there.
+WECHAT_DST="$INSTALL_TARGET/data/.openclaw/extensions/openclaw-weixin"
+if [ -f "$APP_DIR/extensions/openclaw-weixin/openclaw.plugin.json" ]; then
+    echo -e "  ${CYAN}Installing WeChat plugin...${NC}"
+    mkdir -p "$INSTALL_TARGET/data/.openclaw/extensions"
+    if cp -R "$APP_DIR/extensions/openclaw-weixin" "$WECHAT_DST" 2>/dev/null; then
+        echo -e "  ${GREEN}WeChat plugin installed ✓${NC}"
+    fi
+    # Copy zod from the bundled OpenClaw core: the plugin's npm tarball ships without it
+    # and the host node_modules is off the plugin's resolution path, so otherwise it
+    # fails to load with "Cannot find module 'zod'".
+    if [ ! -d "$WECHAT_DST/node_modules/zod" ] && [ -d "$APP_DIR/core/node_modules/zod" ]; then
+        mkdir -p "$WECHAT_DST/node_modules"
+        cp -R "$APP_DIR/core/node_modules/zod" "$WECHAT_DST/node_modules/zod" 2>/dev/null
+    fi
+fi
 
 # ---- Default config ----
 CONFIG_PATH="$INSTALL_TARGET/data/.openclaw/openclaw.json"

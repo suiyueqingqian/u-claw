@@ -25,7 +25,7 @@ RUNTIME_DIR="$UCLAW_DIR/runtime"
 CORE_DIR="$UCLAW_DIR/core"
 DATA_DIR="$UCLAW_DIR/data"
 CONFIG_PATH="$DATA_DIR/.openclaw/openclaw.json"
-NODE_VERSION="v22.16.0"
+NODE_VERSION="v22.22.3"
 MIRROR="https://registry.npmmirror.com"
 NODE_MIRROR="https://npmmirror.com/mirrors/node"
 
@@ -176,13 +176,14 @@ if [ -d "$CORE_DIR/node_modules/openclaw" ]; then
     echo -e "  ${GREEN}✓${NC} OpenClaw 已安装，跳过"
 else
     if [ ! -f "$CORE_DIR/package.json" ]; then
-        cat > "$CORE_DIR/package.json" << 'PKGJSON'
+        OPENCLAW_VERSION="2026.4.29"
+        cat > "$CORE_DIR/package.json" << PKGJSON
 {
   "name": "u-claw-core",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "openclaw": "latest"
+    "openclaw": "$OPENCLAW_VERSION"
   }
 }
 PKGJSON
@@ -494,9 +495,11 @@ metadata: { "openclaw": { "emoji": "🤖" } }
 
 | 模型 | 适用场景 | 上下文长度 |
 |------|---------|-----------|
-| deepseek-chat | 日常对话、文案写作、知识问答 | 32K |
-| deepseek-coder | 代码生成、代码审查、技术文档 | 16K |
-| deepseek-reasoner | 复杂推理、数学、逻辑分析 | 64K |
+| deepseek-v4-flash | 日常对话、文案写作、知识问答，快且便宜 | 128K |
+| deepseek-v4-pro | 复杂推理、数学、代码 | 128K |
+
+> 注意：旧名 `deepseek-chat` / `deepseek-coder` / `deepseek-reasoner` 已被
+> api.deepseek.com 拒绝，调用会直接返回 HTTP 400。
 
 ## 关键提示
 
@@ -795,7 +798,7 @@ else
         # 模型配置映射
         case $MODEL_CHOICE in
             1)
-                MODEL_NAME="deepseek-chat"
+                MODEL_NAME="deepseek-v4-flash"
                 BASE_URL="https://api.deepseek.com/v1"
                 PROVIDER="custom"
                 KEY_LABEL="DeepSeek API Key"
@@ -803,7 +806,7 @@ else
                 NEED_KEY=true
                 ;;
             2)
-                MODEL_NAME="moonshot-v1-auto"
+                MODEL_NAME="kimi-k2.6"
                 BASE_URL="https://api.moonshot.cn/v1"
                 PROVIDER="custom"
                 KEY_LABEL="Moonshot API Key"
@@ -819,7 +822,7 @@ else
                 NEED_KEY=true
                 ;;
             4)
-                MODEL_NAME="glm-4-plus"
+                MODEL_NAME="glm-5"
                 BASE_URL="https://open.bigmodel.cn/api/paas/v4"
                 PROVIDER="custom"
                 KEY_LABEL="智谱 API Key"
@@ -827,15 +830,15 @@ else
                 NEED_KEY=true
                 ;;
             5)
-                MODEL_NAME="abab6.5s-chat"
-                BASE_URL="https://api.minimax.chat/v1"
+                MODEL_NAME="MiniMax-M3"
+                BASE_URL="https://api.minimaxi.com/v1"
                 PROVIDER="custom"
                 KEY_LABEL="MiniMax API Key"
                 KEY_HINT="获取地址: https://platform.minimaxi.com/"
                 NEED_KEY=true
                 ;;
             6)
-                MODEL_NAME="doubao-pro-256k"
+                MODEL_NAME="doubao-seed-1-6-250615"
                 BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
                 PROVIDER="custom"
                 KEY_LABEL="火山引擎 API Key"
@@ -851,7 +854,7 @@ else
                 NEED_KEY=true
                 ;;
             8)
-                MODEL_NAME="claude-sonnet-4-20250514"
+                MODEL_NAME="claude-sonnet-5"
                 BASE_URL=""
                 PROVIDER="anthropic"
                 KEY_LABEL="Anthropic API Key"
@@ -859,7 +862,7 @@ else
                 NEED_KEY=true
                 ;;
             9)
-                MODEL_NAME="gpt-4o"
+                MODEL_NAME="gpt-5.4"
                 BASE_URL=""
                 PROVIDER="openai"
                 KEY_LABEL="OpenAI API Key"
@@ -876,7 +879,7 @@ else
                 ;;
             *)
                 echo -e "  ${YELLOW}未知选项，使用默认 DeepSeek${NC}"
-                MODEL_NAME="deepseek-chat"
+                MODEL_NAME="deepseek-v4-flash"
                 BASE_URL="https://api.deepseek.com/v1"
                 PROVIDER="custom"
                 KEY_LABEL="DeepSeek API Key"

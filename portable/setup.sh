@@ -13,7 +13,7 @@ CORE_DIR="$APP_DIR/core"
 RUNTIME_DIR="$APP_DIR/runtime"
 MIRROR="https://registry.npmmirror.com"
 NODE_MIRROR="https://npmmirror.com/mirrors/node"
-NODE_VERSION="v22.22.1"
+NODE_VERSION="v22.22.3"
 ALL_PLATFORMS=false
 [ "$1" = "--all-platforms" ] && ALL_PLATFORMS=true
 
@@ -109,24 +109,46 @@ else
     echo -e "  ${CYAN}↓${NC} 安装 OpenClaw..."
     mkdir -p "$CORE_DIR"
 
-    # Init package.json if not exists
+    # Init package.json if not exists (pinned OpenClaw version from OPENCLAW_VERSION)
+    OPENCLAW_VERSION_FILE="$(dirname "$0")/OPENCLAW_VERSION"
+    if [ ! -f "$OPENCLAW_VERSION_FILE" ]; then
+        OPENCLAW_VERSION_FILE="$(dirname "$0")/../OPENCLAW_VERSION"
+    fi
+    OPENCLAW_VERSION="2026.4.29"
+    if [ -f "$OPENCLAW_VERSION_FILE" ]; then
+        OPENCLAW_VERSION="$(tr -d '[:space:]' < "$OPENCLAW_VERSION_FILE")"
+        # Copy version file into portable/ so USB users can read it without repo root
+        cp "$OPENCLAW_VERSION_FILE" "$(dirname "$0")/OPENCLAW_VERSION" 2>/dev/null || true
+    fi
     if [ ! -f "$CORE_DIR/package.json" ]; then
-        cat > "$CORE_DIR/package.json" << 'PKGJSON'
+        cat > "$CORE_DIR/package.json" << PKGJSON
 {
   "name": "u-claw-core",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "openclaw": "latest"
+    "openclaw": "$OPENCLAW_VERSION"
   }
 }
 PKGJSON
     fi
 
-    # Install with China mirror
+    # Install with China mirror（缓存留盘内，拔盘不留痕）
+    # --ignore-scripts 必须加：openclaw 的 preinstall 脚本会调系统 `node`，但便携版
+    # 用的是 app/runtime 下的 node（不在 PATH），未装 Node 的 Mac 用户会因
+    # "node: command not found" 安装失败 (code 127)。与 Mac-Start.command 的 fallback 对齐。
     NODE_BIN="$NODE_TARGET/bin/node"
     NPM_BIN="$NODE_TARGET/bin/npm"
-    "$NODE_BIN" "$NPM_BIN" install --prefix "$CORE_DIR" --registry="$MIRROR"
+    npm_config_cache="$APP_DIR/.npm-cache" "$NODE_BIN" "$NPM_BIN" install --prefix "$CORE_DIR" --registry="$MIRROR" --ignore-scripts --no-audit --no-fund --omit=dev
+
+    # Keep durable OpenClaw state on the USB volume, but redirect only the
+    # managed Chromium profile to the host cache.  These vendor patches are
+    # intentionally fail-closed: a changed upstream bundle must be reviewed
+    # instead of silently producing a partially portable installation.
+    "$NODE_BIN" "$SCRIPT_DIR/lib/patch-managed-browser-root.mjs" "$CORE_DIR"
+    "$NODE_BIN" "$SCRIPT_DIR/lib/patch-device-pairing-retry.mjs" "$CORE_DIR"
+    "$NODE_BIN" --check "$CORE_DIR/node_modules/openclaw/dist/chrome-CtUCaDWQ.js"
+    "$NODE_BIN" --check "$CORE_DIR/node_modules/@openclaw/fs-safe/dist/replace-file.js"
 
     echo -e "  ${GREEN}✓${NC} OpenClaw 安装完成"
 fi
@@ -138,7 +160,7 @@ else
     echo -e "  ${CYAN}↓${NC} 安装 QQ 插件..."
     NODE_BIN="$NODE_TARGET/bin/node"
     NPM_BIN="$NODE_TARGET/bin/npm"
-    "$NODE_BIN" "$NPM_BIN" install @sliverp/qqbot@latest --prefix "$CORE_DIR" --registry="$MIRROR" 2>/dev/null || true
+    npm_config_cache="$APP_DIR/.npm-cache" "$NODE_BIN" "$NPM_BIN" install @sliverp/qqbot@latest --prefix "$CORE_DIR" --registry="$MIRROR" --ignore-scripts --no-audit --no-fund --omit=dev 2>/dev/null || true
     echo -e "  ${GREEN}✓${NC} QQ 插件安装完成"
 fi
 

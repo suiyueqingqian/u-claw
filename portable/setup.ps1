@@ -11,7 +11,7 @@ $runtimeDir = Join-Path $appDir "runtime"
 
 $mirror = "https://registry.npmmirror.com"
 $nodeMirror = "https://npmmirror.com/mirrors/node"
-$nodeVersion = "v22.22.1"
+$nodeVersion = "v22.22.3"
 
 function Write-Step {
     param(
@@ -204,16 +204,24 @@ if ($AllPlatforms) {
 
 $packageJsonPath = Join-Path $coreDir "package.json"
 if (-not (Test-Path -Path $packageJsonPath -PathType Leaf)) {
-    $packageJson = @'
+    $openclawVersionFile = Join-Path $PSScriptRoot "OPENCLAW_VERSION"
+    if (-not (Test-Path -Path $openclawVersionFile -PathType Leaf)) {
+        $openclawVersionFile = Join-Path $PSScriptRoot "..\OPENCLAW_VERSION"
+    }
+    $openclawVersion = "2026.4.29"
+    if (Test-Path -Path $openclawVersionFile -PathType Leaf) {
+        $openclawVersion = (Get-Content -Path $openclawVersionFile -Raw).Trim()
+    }
+    $packageJson = @"
 {
   "name": "u-claw-core",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "openclaw": "latest"
+    "openclaw": "$openclawVersion"
   }
 }
-'@
+"@
     $packageJson | Out-File -FilePath $packageJsonPath -Encoding utf8
 }
 
